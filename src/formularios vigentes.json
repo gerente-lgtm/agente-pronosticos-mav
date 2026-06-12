@@ -1,0 +1,582 @@
+{
+  "descripcion": "Estado vigente de los picks del Bono Ganagol (Mundial 2026) para los tres formularios MAV. El agente lo lee para comparar contra su recomendacion diaria. Se actualiza cuando el usuario confirma un cambio en el Forms.",
+  "actualizado": "2026-06-12",
+  "fase_grupos": [
+    {
+      "n": 1,
+      "equipo1": "MÉXICO",
+      "equipo2": "SUDÁFRICA",
+      "sello": "1",
+      "solsticio": "1",
+      "disruptivo": "2"
+    },
+    {
+      "n": 2,
+      "equipo1": "COREA DEL SUR",
+      "equipo2": "REPÚBLICA CHECA",
+      "sello": "1",
+      "solsticio": "1",
+      "disruptivo": "2"
+    },
+    {
+      "n": 3,
+      "equipo1": "CANADÁ",
+      "equipo2": "BOSNIA HERZEGOVINA",
+      "sello": "1",
+      "solsticio": "1",
+      "disruptivo": "X"
+    },
+    {
+      "n": 4,
+      "equipo1": "ESTADOS UNIDOS",
+      "equipo2": "PARAGUAY",
+      "sello": "1",
+      "solsticio": "1",
+      "disruptivo": "1"
+    },
+    {
+      "n": 5,
+      "equipo1": "QATAR",
+      "equipo2": "SUIZA",
+      "sello": "2",
+      "solsticio": "2",
+      "disruptivo": "2"
+    },
+    {
+      "n": 6,
+      "equipo1": "BRASIL",
+      "equipo2": "MARRUECOS",
+      "sello": "1",
+      "solsticio": "X",
+      "disruptivo": "2"
+    },
+    {
+      "n": 7,
+      "equipo1": "HAITÍ",
+      "equipo2": "ESCOCIA",
+      "sello": "2",
+      "solsticio": "2",
+      "disruptivo": "2"
+    },
+    {
+      "n": 8,
+      "equipo1": "AUSTRALIA",
+      "equipo2": "TURQUÍA",
+      "sello": "2",
+      "solsticio": "2",
+      "disruptivo": "2"
+    },
+    {
+      "n": 9,
+      "equipo1": "ALEMANIA",
+      "equipo2": "CURAZAO",
+      "sello": "1",
+      "solsticio": "1",
+      "disruptivo": "1"
+    },
+    {
+      "n": 10,
+      "equipo1": "PAÍSES BAJOS",
+      "equipo2": "JAPÓN",
+      "sello": "1",
+      "solsticio": "X",
+      "disruptivo": "2"
+    },
+    {
+      "n": 11,
+      "equipo1": "COSTA DE MARFIL",
+      "equipo2": "ECUADOR",
+      "sello": "X",
+      "solsticio": "X",
+      "disruptivo": "2"
+    },
+    {
+      "n": 12,
+      "equipo1": "SUECIA",
+      "equipo2": "TÚNEZ",
+      "sello": "1",
+      "solsticio": "1",
+      "disruptivo": "1"
+    },
+    {
+      "n": 13,
+      "equipo1": "ESPAÑA",
+      "equipo2": "CABO VERDE",
+      "sello": "1",
+      "solsticio": "1",
+      "disruptivo": "1"
+    },
+    {
+      "n": 14,
+      "equipo1": "BÉLGICA",
+      "equipo2": "EGIPTO",
+      "sello": "1",
+      "solsticio": "1",
+      "disruptivo": "1"
+    },
+    {
+      "n": 15,
+      "equipo1": "ARABIA SAUDITA",
+      "equipo2": "URUGUAY",
+      "sello": "2",
+      "solsticio": "2",
+      "disruptivo": "2"
+    },
+    {
+      "n": 16,
+      "equipo1": "IRÁN",
+      "equipo2": "NUEVA ZELANDA",
+      "sello": "1",
+      "solsticio": "1",
+      "disruptivo": "1"
+    },
+    {
+      "n": 17,
+      "equipo1": "FRANCIA",
+      "equipo2": "SENEGAL",
+      "sello": "1",
+      "solsticio": "1",
+      "disruptivo": "X"
+    },
+    {
+      "n": 18,
+      "equipo1": "IRAK",
+      "equipo2": "NORUEGA",
+      "sello": "2",
+      "solsticio": "2",
+      "disruptivo": "2"
+    },
+    {
+      "n": 19,
+      "equipo1": "ARGENTINA",
+      "equipo2": "ARGELIA",
+      "sello": "1",
+      "solsticio": "1",
+      "disruptivo": "1"
+    },
+    {
+      "n": 20,
+      "equipo1": "AUSTRIA",
+      "equipo2": "JORDANIA",
+      "sello": "1",
+      "solsticio": "1",
+      "disruptivo": "1"
+    },
+    {
+      "n": 21,
+      "equipo1": "PORTUGAL",
+      "equipo2": "RD CONGO",
+      "sello": "1",
+      "solsticio": "1",
+      "disruptivo": "1"
+    },
+    {
+      "n": 22,
+      "equipo1": "INGLATERRA",
+      "equipo2": "CROACIA",
+      "sello": "1",
+      "solsticio": "1",
+      "disruptivo": "1"
+    },
+    {
+      "n": 23,
+      "equipo1": "GHANA",
+      "equipo2": "PANAMÁ",
+      "sello": "1",
+      "solsticio": "1",
+      "disruptivo": "1"
+    },
+    {
+      "n": 24,
+      "equipo1": "UZBEKISTÁN",
+      "equipo2": "COLOMBIA",
+      "sello": "2",
+      "solsticio": "2",
+      "disruptivo": "2"
+    },
+    {
+      "n": 25,
+      "equipo1": "REPÚBLICA CHECA",
+      "equipo2": "SUDÁFRICA",
+      "sello": "1",
+      "solsticio": "1",
+      "disruptivo": "1"
+    },
+    {
+      "n": 26,
+      "equipo1": "SUIZA",
+      "equipo2": "BOSNIA HERZEGOVINA",
+      "sello": "1",
+      "solsticio": "1",
+      "disruptivo": "1"
+    },
+    {
+      "n": 27,
+      "equipo1": "CANADÁ",
+      "equipo2": "QATAR",
+      "sello": "1",
+      "solsticio": "1",
+      "disruptivo": "1"
+    },
+    {
+      "n": 28,
+      "equipo1": "MÉXICO",
+      "equipo2": "COREA DEL SUR",
+      "sello": "1",
+      "solsticio": "1",
+      "disruptivo": "X"
+    },
+    {
+      "n": 29,
+      "equipo1": "ESTADOS UNIDOS",
+      "equipo2": "AUSTRALIA",
+      "sello": "1",
+      "solsticio": "1",
+      "disruptivo": "1"
+    },
+    {
+      "n": 30,
+      "equipo1": "ESCOCIA",
+      "equipo2": "MARRUECOS",
+      "sello": "2",
+      "solsticio": "2",
+      "disruptivo": "2"
+    },
+    {
+      "n": 31,
+      "equipo1": "BRASIL",
+      "equipo2": "HAITÍ",
+      "sello": "1",
+      "solsticio": "1",
+      "disruptivo": "1"
+    },
+    {
+      "n": 32,
+      "equipo1": "TURQUÍA",
+      "equipo2": "PARAGUAY",
+      "sello": "1",
+      "solsticio": "1",
+      "disruptivo": "1"
+    },
+    {
+      "n": 33,
+      "equipo1": "PAÍSES BAJOS",
+      "equipo2": "SUECIA",
+      "sello": "1",
+      "solsticio": "1",
+      "disruptivo": "1"
+    },
+    {
+      "n": 34,
+      "equipo1": "ALEMANIA",
+      "equipo2": "COSTA DE MARFIL",
+      "sello": "1",
+      "solsticio": "1",
+      "disruptivo": "1"
+    },
+    {
+      "n": 35,
+      "equipo1": "ECUADOR",
+      "equipo2": "CURAZAO",
+      "sello": "1",
+      "solsticio": "1",
+      "disruptivo": "1"
+    },
+    {
+      "n": 36,
+      "equipo1": "TÚNEZ",
+      "equipo2": "JAPÓN",
+      "sello": "2",
+      "solsticio": "2",
+      "disruptivo": "2"
+    },
+    {
+      "n": 37,
+      "equipo1": "ESPAÑA",
+      "equipo2": "ARABIA SAUDITA",
+      "sello": "1",
+      "solsticio": "1",
+      "disruptivo": "1"
+    },
+    {
+      "n": 38,
+      "equipo1": "BÉLGICA",
+      "equipo2": "IRÁN",
+      "sello": "1",
+      "solsticio": "1",
+      "disruptivo": "1"
+    },
+    {
+      "n": 39,
+      "equipo1": "URUGUAY",
+      "equipo2": "CABO VERDE",
+      "sello": "1",
+      "solsticio": "1",
+      "disruptivo": "1"
+    },
+    {
+      "n": 40,
+      "equipo1": "NUEVA ZELANDA",
+      "equipo2": "EGIPTO",
+      "sello": "2",
+      "solsticio": "2",
+      "disruptivo": "2"
+    },
+    {
+      "n": 41,
+      "equipo1": "ARGENTINA",
+      "equipo2": "AUSTRIA",
+      "sello": "1",
+      "solsticio": "1",
+      "disruptivo": "1"
+    },
+    {
+      "n": 42,
+      "equipo1": "FRANCIA",
+      "equipo2": "IRAK",
+      "sello": "1",
+      "solsticio": "1",
+      "disruptivo": "1"
+    },
+    {
+      "n": 43,
+      "equipo1": "NORUEGA",
+      "equipo2": "SENEGAL",
+      "sello": "1",
+      "solsticio": "X",
+      "disruptivo": "1"
+    },
+    {
+      "n": 44,
+      "equipo1": "JORDANIA",
+      "equipo2": "ARGELIA",
+      "sello": "2",
+      "solsticio": "2",
+      "disruptivo": "2"
+    },
+    {
+      "n": 45,
+      "equipo1": "PORTUGAL",
+      "equipo2": "UZBEKISTÁN",
+      "sello": "1",
+      "solsticio": "1",
+      "disruptivo": "1"
+    },
+    {
+      "n": 46,
+      "equipo1": "INGLATERRA",
+      "equipo2": "GHANA",
+      "sello": "1",
+      "solsticio": "1",
+      "disruptivo": "1"
+    },
+    {
+      "n": 47,
+      "equipo1": "PANAMÁ",
+      "equipo2": "CROACIA",
+      "sello": "2",
+      "solsticio": "2",
+      "disruptivo": "2"
+    },
+    {
+      "n": 48,
+      "equipo1": "COLOMBIA",
+      "equipo2": "RD CONGO",
+      "sello": "1",
+      "solsticio": "1",
+      "disruptivo": "1"
+    },
+    {
+      "n": 49,
+      "equipo1": "SUIZA",
+      "equipo2": "CANADÁ",
+      "sello": "1",
+      "solsticio": "1",
+      "disruptivo": "X"
+    },
+    {
+      "n": 50,
+      "equipo1": "BOSNIA HERZEGOVINA",
+      "equipo2": "QATAR",
+      "sello": "1",
+      "solsticio": "1",
+      "disruptivo": "1"
+    },
+    {
+      "n": 51,
+      "equipo1": "ESCOCIA",
+      "equipo2": "BRASIL",
+      "sello": "2",
+      "solsticio": "2",
+      "disruptivo": "2"
+    },
+    {
+      "n": 52,
+      "equipo1": "MARRUECOS",
+      "equipo2": "HAITÍ",
+      "sello": "1",
+      "solsticio": "1",
+      "disruptivo": "1"
+    },
+    {
+      "n": 53,
+      "equipo1": "REPÚBLICA CHECA",
+      "equipo2": "MÉXICO",
+      "sello": "X",
+      "solsticio": "2",
+      "disruptivo": "1"
+    },
+    {
+      "n": 54,
+      "equipo1": "SUDÁFRICA",
+      "equipo2": "COREA DEL SUR",
+      "sello": "2",
+      "solsticio": "2",
+      "disruptivo": "2"
+    },
+    {
+      "n": 55,
+      "equipo1": "CURAZAO",
+      "equipo2": "COSTA DE MARFIL",
+      "sello": "2",
+      "solsticio": "2",
+      "disruptivo": "2"
+    },
+    {
+      "n": 56,
+      "equipo1": "ECUADOR",
+      "equipo2": "ALEMANIA",
+      "sello": "X",
+      "solsticio": "X",
+      "disruptivo": "1"
+    },
+    {
+      "n": 57,
+      "equipo1": "JAPÓN",
+      "equipo2": "SUECIA",
+      "sello": "1",
+      "solsticio": "1",
+      "disruptivo": "1"
+    },
+    {
+      "n": 58,
+      "equipo1": "TÚNEZ",
+      "equipo2": "PAÍSES BAJOS",
+      "sello": "2",
+      "solsticio": "X",
+      "disruptivo": "2"
+    },
+    {
+      "n": 59,
+      "equipo1": "TURQUÍA",
+      "equipo2": "ESTADOS UNIDOS",
+      "sello": "X",
+      "solsticio": "X",
+      "disruptivo": "1"
+    },
+    {
+      "n": 60,
+      "equipo1": "PARAGUAY",
+      "equipo2": "AUSTRALIA",
+      "sello": "1",
+      "solsticio": "1",
+      "disruptivo": "1"
+    },
+    {
+      "n": 61,
+      "equipo1": "NORUEGA",
+      "equipo2": "FRANCIA",
+      "sello": "X",
+      "solsticio": "2",
+      "disruptivo": "1"
+    },
+    {
+      "n": 62,
+      "equipo1": "SENEGAL",
+      "equipo2": "IRAK",
+      "sello": "1",
+      "solsticio": "1",
+      "disruptivo": "1"
+    },
+    {
+      "n": 63,
+      "equipo1": "CABO VERDE",
+      "equipo2": "ARABIA SAUDITA",
+      "sello": "1",
+      "solsticio": "1",
+      "disruptivo": "1"
+    },
+    {
+      "n": 64,
+      "equipo1": "URUGUAY",
+      "equipo2": "ESPAÑA",
+      "sello": "X",
+      "solsticio": "X",
+      "disruptivo": "X"
+    },
+    {
+      "n": 65,
+      "equipo1": "EGIPTO",
+      "equipo2": "IRÁN",
+      "sello": "1",
+      "solsticio": "1",
+      "disruptivo": "1"
+    },
+    {
+      "n": 66,
+      "equipo1": "NUEVA ZELANDA",
+      "equipo2": "BÉLGICA",
+      "sello": "2",
+      "solsticio": "2",
+      "disruptivo": "2"
+    },
+    {
+      "n": 67,
+      "equipo1": "PANAMÁ",
+      "equipo2": "INGLATERRA",
+      "sello": "2",
+      "solsticio": "2",
+      "disruptivo": "2"
+    },
+    {
+      "n": 68,
+      "equipo1": "CROACIA",
+      "equipo2": "GHANA",
+      "sello": "1",
+      "solsticio": "1",
+      "disruptivo": "1"
+    },
+    {
+      "n": 69,
+      "equipo1": "COLOMBIA",
+      "equipo2": "PORTUGAL",
+      "sello": "2",
+      "solsticio": "1",
+      "disruptivo": "1"
+    },
+    {
+      "n": 70,
+      "equipo1": "RD CONGO",
+      "equipo2": "UZBEKISTÁN",
+      "sello": "1",
+      "solsticio": "1",
+      "disruptivo": "1"
+    },
+    {
+      "n": 71,
+      "equipo1": "ARGELIA",
+      "equipo2": "AUSTRIA",
+      "sello": "2",
+      "solsticio": "2",
+      "disruptivo": "2"
+    },
+    {
+      "n": 72,
+      "equipo1": "JORDANIA",
+      "equipo2": "ARGENTINA",
+      "sello": "2",
+      "solsticio": "2",
+      "disruptivo": "2"
+    }
+  ]
+}
