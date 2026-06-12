@@ -30,6 +30,25 @@ def cargar_protocolo() -> str:
         return f.read()
 
 
+def cargar_vigentes_texto() -> str:
+    """Lee formularios_vigentes.json y lo devuelve como tabla compacta de texto
+    para que el modelo compare su recomendación contra el estado actual."""
+    path = os.path.join(HERE, "formularios_vigentes.json")
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            doc = json.load(f)
+    except Exception:
+        return "(No se pudo leer el estado vigente; omite la comparación.)"
+    lineas = []
+    for p in doc.get("fase_grupos", []):
+        lineas.append(
+            f"#{p['n']} {p['equipo1']} vs {p['equipo2']} → "
+            f"Sello:{p['sello']} Solsticio:{p['solsticio']} Disruptivo:{p['disruptivo']}"
+        )
+    actualizado = doc.get("actualizado", "")
+    return f"(Estado vigente, actualizado {actualizado})\n" + "\n".join(lineas)
+
+
 def fecha_colombia() -> datetime.date:
     # Colombia = UTC-5, sin horario de verano
     return (datetime.datetime.utcnow() - datetime.timedelta(hours=5)).date()
@@ -46,9 +65,12 @@ TAREA:
    confirmadas, lesiones/bajas de jugadores clave, forma reciente, contexto,
    sede y clima. Si hay mercados de apuestas o Polymarket disponibles, úsalos
    como referencia de probabilidad/leverage.
-3. Aplica el PROTOCOLO MAV (abajo) y entrega los picks 1/X/2 para los tres
-   formularios (Sello, Solsticio, Disruptivo) de cada partido del día.
-4. Si no se juega ningún partido hoy, dilo claramente en una sola línea.
+3. Aplica el PROTOCOLO MAV (abajo) y decide los picks 1/X/2 recomendados para
+   los tres formularios (Sello, Solsticio, Disruptivo) de cada partido del día.
+4. COMPARA tu recomendación con el ESTADO VIGENTE de abajo: busca cada partido
+   de hoy por los nombres de los equipos y mira qué tiene cargado el usuario en
+   cada formulario. Para cada formulario indica si debe DEJAR IGUAL o CAMBIAR.
+5. Si no se juega ningún partido hoy, dilo claramente en una sola línea.
 
 FORMATO DE ENVÍO (MUY IMPORTANTE):
 - Comienza el bloque de CADA partido con una línea que contenga exactamente:
@@ -56,10 +78,13 @@ FORMATO DE ENVÍO (MUY IMPORTANTE):
 - No escribas ningún título general ni texto introductorio antes del primer
   ===PARTIDO===. Empieza directo con el marcador y el primer partido.
 - Después del último partido, agrega una sola línea final con la acción
-  ("Acción: revisa y confirma cada pick en el Forms antes de su pitazo.").
+  ("Acción: aplica solo los cambios marcados 🔄 en el Forms antes de cada pitazo.").
 - Sigue el FORMATO DE SALIDA del protocolo para el contenido de cada partido.
 
 Sé honesto: si no encuentras un dato, di "no sé" en vez de inventar.
+
+--- ESTADO VIGENTE (lo que el usuario YA tiene cargado en el Ganagol) ---
+{cargar_vigentes_texto()}
 
 --- PROTOCOLO MAV ---
 {cargar_protocolo()}
