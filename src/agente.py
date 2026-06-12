@@ -48,9 +48,17 @@ TAREA:
    como referencia de probabilidad/leverage.
 3. Aplica el PROTOCOLO MAV (abajo) y entrega los picks 1/X/2 para los tres
    formularios (Sello, Solsticio, Disruptivo) de cada partido del día.
-4. Si no se juega ningún partido hoy, dilo claramente en una línea.
+4. Si no se juega ningún partido hoy, dilo claramente en una sola línea.
 
-Responde en el FORMATO DE SALIDA que indica el protocolo, listo para Telegram.
+FORMATO DE ENVÍO (MUY IMPORTANTE):
+- Comienza el bloque de CADA partido con una línea que contenga exactamente:
+  ===PARTIDO===
+- No escribas ningún título general ni texto introductorio antes del primer
+  ===PARTIDO===. Empieza directo con el marcador y el primer partido.
+- Después del último partido, agrega una sola línea final con la acción
+  ("Acción: revisa y confirma cada pick en el Forms antes de su pitazo.").
+- Sigue el FORMATO DE SALIDA del protocolo para el contenido de cada partido.
+
 Sé honesto: si no encuentras un dato, di "no sé" en vez de inventar.
 
 --- PROTOCOLO MAV ---
@@ -86,18 +94,46 @@ def enviar_telegram(texto: str) -> None:
             r.read()
 
 
+def trocear_en_partidos(salida: str) -> list:
+    """Separa la salida del modelo en un bloque por partido usando el marcador.
+    Si no hay marcador (ej. 'hoy no hay partidos'), devuelve un solo bloque."""
+    marcador = "===PARTIDO==="
+    if marcador in salida:
+        partes = [p.strip() for p in salida.split(marcador)]
+        return [p for p in partes if p]
+    s = salida.strip()
+    return [s] if s else []
+
+
 def main() -> int:
     hoy = fecha_colombia()
-    encabezado = f"🤖 Agente Pronósticos MAV — {hoy.strftime('%d/%m/%Y')}\n\n"
     try:
         salida = consultar_claude(construir_prompt(hoy))
     except Exception as e:
-        enviar_telegram(encabezado + f"⚠️ Error al generar los picks: {e}")
+        enviar_telegram(f"🤖 Agente Pronósticos MAV — {hoy.strftime('%d/%m/%Y')}\n\n"
+                        f"⚠️ Error al generar los picks: {e}")
         return 1
-    if not salida:
-        salida = "No recibí contenido del modelo. Revisa manualmente los partidos de hoy."
-    enviar_telegram(encabezado + salida)
-    print("Picks enviados a Telegram.")
+
+    bloques = trocear_en_partidos(salida)
+    if not bloques:
+        enviar_telegram(f"🤖 Agente Pronósticos MAV — {hoy.strftime('%d/%m/%Y')}\n\n"
+                        "No recibí contenido del modelo. Revisa manualmente los partidos de hoy.")
+        return 0
+
+    # Mensaje de encabezado (buenos días)
+    n = len(bloques)
+    es_no_partidos = (n == 1 and "no" in bloques[0].lower()[:25])
+    if es_no_partidos:
+        enviar_telegram(f"🤖 Agente Pronósticos MAV — {hoy.strftime('%d/%m/%Y')}\n\n{bloques[0]}")
+        print("Sin partidos hoy.")
+        return 0
+
+    enviar_telegram(f"🤖 Agente Pronósticos MAV — {hoy.strftime('%d/%m/%Y')}\n"
+                    f"{n} partido(s) hoy. Te envío uno por mensaje 👇")
+    for bloque in bloques:
+        enviar_telegram(bloque)
+
+    print(f"Enviados {n} bloque(s) a Telegram.")
     return 0
 
 
