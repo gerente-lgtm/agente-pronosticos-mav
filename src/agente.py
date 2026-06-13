@@ -59,8 +59,14 @@ def construir_prompt(hoy: datetime.date) -> str:
     return f"""Hoy es {fecha_txt}. Eres el Agente Pronósticos MAV.
 
 TAREA:
-1. Busca en internet qué partidos del Mundial 2026 se juegan HOY ({fecha_txt}),
-   con su hora en Colombia, sede y grupo.
+1. Busca en internet qué partidos del Mundial 2026 se juegan HOY ({fecha_txt}).
+   CRITERIO DE DÍA (IMPORTANTE): incluye TODO partido cuyo pitazo (hora de inicio)
+   caiga dentro de hoy en HORA DE COLOMBIA (entre las 00:00 y las 23:59 COL),
+   sin importar la fecha oficial del fixture FIFA ni la zona horaria del estadio.
+   Ejemplo: un partido que arranca a las 23:00 hora Colombia se incluye HOY,
+   aunque en la sede ya sea el día siguiente. El usuario puede modificar ese pick
+   en el Forms hasta su pitazo, así que cuenta como del día de hoy.
+   Lista cada partido con su hora en Colombia, sede y grupo.
 2. Para cada partido, investiga lo más reciente: alineaciones probables o
    confirmadas, lesiones/bajas de jugadores clave, forma reciente, contexto,
    sede y clima. Si hay mercados de apuestas o Polymarket disponibles, úsalos
@@ -70,13 +76,15 @@ TAREA:
 4. COMPARA tu recomendación con el ESTADO VIGENTE de abajo: busca cada partido
    de hoy por los nombres de los equipos y mira qué tiene cargado el usuario en
    cada formulario. Para cada formulario indica si debe DEJAR IGUAL o CAMBIAR.
-5. Si no se juega ningún partido hoy, dilo claramente en una sola línea.
+5. Si no se juega ningún partido hoy (según el criterio de hora Colombia), dilo
+   claramente en una sola línea.
 
 FORMATO DE ENVÍO (MUY IMPORTANTE):
 - Comienza el bloque de CADA partido con una línea que contenga exactamente:
   ===PARTIDO===
-- No escribas ningún título general ni texto introductorio antes del primer
-  ===PARTIDO===. Empieza directo con el marcador y el primer partido.
+- No escribas NADA antes del primer ===PARTIDO===: ni título, ni saludo, ni un
+  resumen o conteo de partidos, ni texto de "estoy buscando...". Tu PRIMERA línea
+  de salida debe ser exactamente ===PARTIDO===. (El conteo lo pone el sistema.)
 - Después del último partido, agrega una sola línea final con la acción
   ("Acción: aplica solo los cambios marcados 🔄 en el Forms antes de cada pitazo.").
 - Sigue el FORMATO DE SALIDA del protocolo para el contenido de cada partido.
@@ -121,10 +129,13 @@ def enviar_telegram(texto: str) -> None:
 
 def trocear_en_partidos(salida: str) -> list:
     """Separa la salida del modelo en un bloque por partido usando el marcador.
+    Descarta cualquier preámbulo antes del primer marcador (resúmenes, saludos).
     Si no hay marcador (ej. 'hoy no hay partidos'), devuelve un solo bloque."""
     marcador = "===PARTIDO==="
     if marcador in salida:
-        partes = [p.strip() for p in salida.split(marcador)]
+        # Todo lo anterior al primer marcador se descarta (preámbulo del modelo).
+        cuerpo = salida.split(marcador, 1)[1]
+        partes = [p.strip() for p in cuerpo.split(marcador)]
         return [p for p in partes if p]
     s = salida.strip()
     return [s] if s else []
