@@ -1,10 +1,20 @@
 name: Revisión diaria MAV
 
-# Corre todos los días a las 12:00 UTC = 7:00 AM hora Colombia.
+# GitHub Actions a veces retrasa o se salta las tareas programadas (cron) en
+# cuentas gratuitas. Para darle varias oportunidades, programamos tres corridas
+# tempranas. Como el agente solo PREPARA y envía a Telegram (no toca el Forms),
+# recibir el informe más de una vez no causa ningún problema.
+#
+# Horarios (Colombia = UTC-5):
+#   11:40 UTC = 6:40 AM COL
+#   12:00 UTC = 7:00 AM COL
+#   12:20 UTC = 7:20 AM COL
 # También se puede disparar a mano desde la pestaña Actions ("Run workflow").
 on:
   schedule:
+    - cron: "40 11 * * *"
     - cron: "0 12 * * *"
+    - cron: "20 12 * * *"
   workflow_dispatch:
 
 jobs:
