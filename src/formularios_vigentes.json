@@ -1,6 +1,6 @@
 {
   "descripcion": "Estado vigente de los picks del Bono Ganagol (Mundial 2026) para los tres formularios MAV. El agente lo lee para comparar contra su recomendacion diaria. Se actualiza cuando el usuario confirma un cambio en el Forms.",
-  "actualizado": "2026-06-12",
+  "actualizado": "2026-06-13",
   "fase_grupos": [
     {
       "n": 1,
@@ -47,8 +47,8 @@
       "equipo1": "BRASIL",
       "equipo2": "MARRUECOS",
       "sello": "1",
-      "solsticio": "X",
-      "disruptivo": "2"
+      "solsticio": "1",
+      "disruptivo": "X"
     },
     {
       "n": 7,
