@@ -74,6 +74,7 @@ def _leer_picks_notion() -> list:
     for f in filas:
         p = f.get("properties", {})
         picks.append({
+            "id": f.get("id"),
             "n": numero(p, "N"),
             "equipo1": rich(p, "Equipo 1"),
             "equipo2": rich(p, "Equipo 2"),
@@ -91,6 +92,48 @@ def _leer_picks_json() -> list:
     with open(path, "r", encoding="utf-8") as f:
         doc = json.load(f)
     return doc.get("fase_grupos", [])
+
+
+def _patch_fecha_notion(page_id: str, fecha_iso: str) -> None:
+    """Escribe la propiedad Fecha de una fila de la base Picks Vigentes MAV.
+    Requiere que la integración de Notion tenga permiso de escritura."""
+    url = f"https://api.notion.com/v1/pages/{page_id}"
+    headers = {
+        "Authorization": f"Bearer {NOTION_TOKEN}",
+        "Notion-Version": NOTION_VERSION,
+        "Content-Type": "application/json",
+    }
+    payload = {"properties": {"Fecha": {"date": {"start": fecha_iso}}}}
+    req = urllib.request.Request(url, data=json.dumps(payload).encode(),
+                                 headers=headers, method="PATCH")
+    with urllib.request.urlopen(req) as r:
+        r.read()
+
+
+def estampar_fechas_hoy(ns: list, hoy: datetime.date) -> None:
+    """Marca Fecha=hoy en las filas de Notion de los partidos de hoy (por N).
+    Es lo que permite que el comando /update del bot muestre solo los de hoy.
+    Best-effort: si falla, no interrumpe el envío de los picks a Telegram."""
+    if not NOTION_TOKEN or not ns:
+        return
+    try:
+        picks = _leer_picks_notion()
+    except Exception as e:
+        print(f"Aviso: no pude leer Notion para estampar fechas ({e}).")
+        return
+    por_n = {p["n"]: p.get("id") for p in picks if p.get("id")}
+    fecha_iso = hoy.isoformat()
+    marcados = 0
+    for n in ns:
+        page_id = por_n.get(n)
+        if not page_id:
+            continue
+        try:
+            _patch_fecha_notion(page_id, fecha_iso)
+            marcados += 1
+        except Exception as e:
+            print(f"Aviso: no pude estampar fecha en N={n} ({e}).")
+    print(f"Fechas estampadas en Notion: {marcados}/{len(ns)}.")
 
 
 def cargar_vigentes_texto() -> str:
@@ -168,6 +211,12 @@ FORMATO DE ENVÍO (MUY IMPORTANTE):
 - Después del último partido, agrega una sola línea final con la acción
   ("Acción: aplica solo los cambios marcados 🔄 en el Forms antes de cada pitazo.").
 - Sigue el FORMATO DE SALIDA del protocolo para el contenido de cada partido.
+- AL FINAL DE TODO (en la última línea, después de la acción) agrega el marcador
+  ===NUMEROS_HOY=== seguido de los números N (de la tabla ESTADO VIGENTE) de los
+  partidos de hoy, separados por coma. Ejemplo: ===NUMEROS_HOY=== 9,10,11
+  Si hoy no hay partidos, escribe: ===NUMEROS_HOY=== ninguno
+  El sistema usa esa línea para marcar la fecha en Notion y NO se muestra en
+  Telegram; por eso debe ir tal cual, con los N exactos del estado vigente.
 
 Sé honesto: si no encuentras un dato, di "no sé" en vez de inventar.
 
@@ -207,6 +256,19 @@ def enviar_telegram(texto: str) -> None:
             r.read()
 
 
+def extraer_numeros_hoy(salida: str):
+    """Separa el marcador ===NUMEROS_HOY=== del cuerpo. Devuelve
+    (lista_de_N, salida_sin_el_marcador). El marcador no se envía a Telegram."""
+    marca = "===NUMEROS_HOY==="
+    idx = salida.find(marca)
+    if idx == -1:
+        return [], salida
+    cola = salida[idx + len(marca):].strip()
+    primera = cola.splitlines()[0] if cola else ""
+    ns = [int(t) for t in primera.replace(" ", "").split(",") if t.isdigit()]
+    return ns, salida[:idx].rstrip()
+
+
 def trocear_en_partidos(salida: str) -> list:
     """Separa la salida del modelo en un bloque por partido usando el marcador.
     Descarta cualquier preámbulo antes del primer marcador (resúmenes, saludos).
@@ -229,6 +291,14 @@ def main() -> int:
         enviar_telegram(f"🤖 Agente Pronósticos MAV — {hoy.strftime('%d/%m/%Y')}\n\n"
                         f"⚠️ Error al generar los picks: {e}")
         return 1
+
+    # Marca en Notion la fecha de hoy en los partidos detectados (para el /update
+    # del bot) y quita el marcador antes de enviar a Telegram.
+    ns_hoy, salida = extraer_numeros_hoy(salida)
+    try:
+        estampar_fechas_hoy(ns_hoy, hoy)
+    except Exception as e:
+        print(f"Aviso: fallo al estampar fechas en Notion ({e}).")
 
     bloques = trocear_en_partidos(salida)
     if not bloques:

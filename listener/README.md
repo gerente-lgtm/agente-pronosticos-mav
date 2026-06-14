@@ -1,8 +1,17 @@
-# Listener de Telegram — disparar el agente con /picks
+# Listener de Telegram — comandos /picks y /update
 
-Hace que, al escribirle **`/picks`** al bot en Telegram, se ejecute el workflow
-"Revisión diaria MAV" (el mismo del cron de las 7 AM) y lleguen los picks del día.
-Sirve como función nueva y como **respaldo manual** si el cron no dispara.
+Hace que, escribiéndole al bot en Telegram:
+- **`/picks`** → se ejecuta el workflow "Revisión diaria MAV" (el mismo del cron de
+  las 7 AM) y llegan los picks del día. Sirve también como **respaldo manual** si el
+  cron no dispara.
+- **`/update`** (o `/actualizar`) → flujo guiado por botones para corregir en Notion
+  un pick que cambiaste en el Forms: eliges el partido (solo los de hoy) → el
+  formulario (Sello/Solsticio/Disruptivo) → el valor (1/X/2 o "no cambié nada"), con
+  opción de Cancelar en cada paso y confirmación al final.
+
+Los "partidos de hoy" salen de la columna **Fecha** de la base "Picks Vigentes MAV",
+que el agente (`agente.py`) estampa cada vez que corre. Si el agente no ha corrido
+hoy, `/update` te pide que primero uses `/picks`.
 
 Es un **Cloudflare Worker**: un mini-programa gratis que queda siempre prendido
 escuchando a Telegram. GitHub Actions no puede escuchar; por eso va aparte.
@@ -37,8 +46,12 @@ En el Worker → **Settings** → **Variables and Secrets** → **Add**, crea es
 | `TELEGRAM_TOKEN` | token del bot @agente_mav_bot |
 | `TELEGRAM_CHAT_ID` | tu chat id |
 | `WEBHOOK_SECRET` | la palabra secreta que inventaste |
+| `NOTION_TOKEN` | token de la integración "Agente MAV" (con permiso de escritura) |
 
 Guarda y **Deploy** de nuevo si lo pide.
+
+> El `NOTION_TOKEN` lo necesita el comando `/update` para leer y escribir en la base.
+> La integración debe tener activado **Update content** en https://www.notion.so/my-integrations.
 
 ### 3. Copiar la URL del Worker
 En la página del Worker aparece una URL tipo:
