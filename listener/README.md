@@ -9,9 +9,9 @@ Hace que, escribiéndole al bot en Telegram:
   formulario (Sello/Solsticio/Disruptivo) → el valor (1/X/2 o "no cambié nada"), con
   opción de Cancelar en cada paso y confirmación al final.
 
-Los "partidos de hoy" salen de la columna **Fecha** de la base "Picks Vigentes MAV",
-que el agente (`agente.py`) estampa cada vez que corre. Si el agente no ha corrido
-hoy, `/update` te pide que primero uses `/picks`.
+Los "partidos de hoy" salen de la columna **Fecha** de la base "Picks Vigentes MAV".
+Esa columna se llena una sola vez con el calendario completo de fase de grupos
+mediante el workflow **"Cargar fechas (una vez)"** (ver `scripts/cargar_fechas.py`).
 
 Es un **Cloudflare Worker**: un mini-programa gratis que queda siempre prendido
 escuchando a Telegram. GitHub Actions no puede escuchar; por eso va aparte.

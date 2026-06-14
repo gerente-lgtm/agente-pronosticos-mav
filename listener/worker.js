@@ -6,8 +6,7 @@
 //                           elige partido (solo los de hoy) → formulario → valor 1/X/2.
 //
 // El "partido de hoy" sale de la columna Fecha de la base "Picks Vigentes MAV", que
-// el agente (agente.py) estampa cada vez que corre. Si el agente no ha corrido hoy,
-// /update avisa que primero pidas /picks.
+// se carga una vez con el calendario completo (workflow "Cargar fechas").
 //
 // Secretos en Cloudflare → Settings → Variables and Secrets:
 //   GITHUB_TOKEN      → PAT fine-grained "Actions: Read and write" sobre el repo.
@@ -75,7 +74,7 @@ async function manejarMensaje(msg, env) {
     const partidos = await notionHoy(env);
     if (!partidos.length) {
       await tgSend(env, chatId,
-        "No hay partidos cargados para hoy todavía. Pídeme /picks primero y vuelve a intentar con /update.");
+        "Hoy no hay partidos en el calendario. (Si crees que sí, puede faltar cargar las fechas en Notion.)");
       return;
     }
     const teclado = partidos.map((p) => [

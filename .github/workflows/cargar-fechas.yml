@@ -1,0 +1,25 @@
+name: Cargar fechas (una vez)
+
+# Carga la Fecha y Hora de los 72 partidos de grupos en la base "Picks Vigentes MAV".
+# Se corre A MANO desde la pestaña Actions → Run workflow. Es idempotente: puedes
+# volver a correrlo sin problema (sobrescribe con los mismos valores).
+
+on:
+  workflow_dispatch:
+
+jobs:
+  cargar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Cargar fechas en Notion
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+        run: python scripts/cargar_fechas.py
