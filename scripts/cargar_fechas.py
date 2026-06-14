@@ -17,7 +17,9 @@ import unicodedata
 import urllib.request
 
 NOTION_TOKEN = os.environ["NOTION_TOKEN"]
-NOTION_DB = os.environ.get("NOTION_PICKS_DB", "25ec774d-d514-484e-8303-8b8cbaffec34")
+# OJO: aquí va el database_id (de la URL de la base), NO el data_source_id.
+# Usar el data_source_id (25ec774d...) en /v1/databases/{id}/query da HTTP 404.
+NOTION_DB = os.environ.get("NOTION_PICKS_DB", "71788c0c-8464-4f70-b41a-2afce8f56ae4")
 NOTION_VERSION = "2022-06-28"
 
 # (Equipo 1, Equipo 2, Fecha ISO, Hora COL, Grupo) — calendario en hora Colombia.

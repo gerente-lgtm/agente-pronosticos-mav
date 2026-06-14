@@ -17,7 +17,9 @@
 
 const REPO = "gerente-lgtm/agente-pronosticos-mav";
 const WORKFLOW_FILE = "revision-diaria.yml";
-const NOTION_DB = "25ec774d-d514-484e-8303-8b8cbaffec34"; // base Picks Vigentes MAV
+// database_id de la base Picks Vigentes MAV (de la URL). OJO: NO es el
+// data_source_id (25ec774d...), que en /v1/databases/{id}/query da HTTP 404.
+const NOTION_DB = "71788c0c-8464-4f70-b41a-2afce8f56ae4";
 const NOTION_VERSION = "2022-06-28"; // versión de la API de Notion (válida)
 const FORMS = ["Sello", "Solsticio", "Disruptivo"];
 

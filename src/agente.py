@@ -23,8 +23,11 @@ TELEGRAM_CHAT_ID = os.environ["TELEGRAM_CHAT_ID"]
 MODEL = os.environ.get("MAV_MODEL", "claude-sonnet-4-6")
 
 # Notion: base "Picks Vigentes MAV" (fuente de los picks que el usuario edita).
+# NOTION_PICKS_DB es el database_id (de la URL de la base), NO el data_source_id.
+# Usar el data_source_id (25ec774d...) en /v1/databases/{id}/query da HTTP 404 y
+# hacía que la lectura de Notion fallara en silencio y se usara el JSON de respaldo.
 NOTION_TOKEN = os.environ.get("NOTION_TOKEN", "")
-NOTION_PICKS_DB = os.environ.get("NOTION_PICKS_DB", "25ec774d-d514-484e-8303-8b8cbaffec34")
+NOTION_PICKS_DB = os.environ.get("NOTION_PICKS_DB", "71788c0c-8464-4f70-b41a-2afce8f56ae4")
 NOTION_VERSION = "2022-06-28"
 
 HERE = os.path.dirname(os.path.abspath(__file__))
