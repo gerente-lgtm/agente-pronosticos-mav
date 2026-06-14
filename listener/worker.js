@@ -76,7 +76,7 @@ async function dispararWorkflow(env) {
     headers: {
       Accept: "application/vnd.github+json",
       Authorization: `Bearer ${env.GITHUB_TOKEN}`,
-      "X-GitHub-Api-Version": "2022-06-28",
+      "X-GitHub-Api-Version": "2022-11-28",
       "Content-Type": "application/json",
       "User-Agent": "agente-mav-listener", // GitHub exige User-Agent
     },
