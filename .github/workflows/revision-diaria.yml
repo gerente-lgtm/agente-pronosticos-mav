@@ -1,20 +1,17 @@
 name: Revisión diaria MAV
 
-# GitHub Actions a veces retrasa o se salta las tareas programadas (cron) en
-# cuentas gratuitas. Para darle varias oportunidades, programamos tres corridas
-# tempranas. Como el agente solo PREPARA y envía a Telegram (no toca el Forms),
-# recibir el informe más de una vez no causa ningún problema.
+# PRUEBA temporal (14-jun): horarios cercanos para validar que el cron dispara
+# tras hacer el repo público. Si funciona, volvemos a los horarios de la mañana.
 #
-# Horarios (Colombia = UTC-5):
-#   11:40 UTC = 6:40 AM COL
-#   12:00 UTC = 7:00 AM COL
-#   12:20 UTC = 7:20 AM COL
-# También se puede disparar a mano desde la pestaña Actions ("Run workflow").
+# Horarios de prueba (Colombia = UTC-5):
+#   16:00 UTC = 11:00 AM COL
+#   16:30 UTC = 11:30 AM COL
+#   17:00 UTC = 12:00 PM COL
 on:
   schedule:
-    - cron: "40 11 * * *"
-    - cron: "0 12 * * *"
-    - cron: "20 12 * * *"
+    - cron: "0 16 * * *"
+    - cron: "30 16 * * *"
+    - cron: "0 17 * * *"
   workflow_dispatch:
 
 jobs:
