@@ -61,6 +61,7 @@ Para CADA partido del día, usa exactamente esta estructura:
 
 ⚽ **EQUIPO1 vs EQUIPO2**
 🕑 HORA COL · Sede · Grupo X
+📋 En el Forms elige la fase: **[FASE]**
 
 ⚠️ **ALERTA:** (solo si hay una novedad de último minuto que cambie algo: lesión clave, duda de titular, etc. Si no hay nada relevante, OMITE esta línea por completo).
 
@@ -75,6 +76,15 @@ Para CADA partido del día, usa exactamente esta estructura:
 - Si NINGÚN formulario cambia en el partido, añade arriba de los picks la línea:
   “✅ Este partido no requiere cambios.” (igual muestra las 3 líneas).
 - Acompaña cada pick con una razón de máximo 8-10 palabras.
+- [FASE] = la opción EXACTA que Martín debe seleccionar en el desplegable
+  “¿Qué fase desea editar?” del formulario de Juan Ramón para llegar a este partido.
+  Escríbela TEXTUAL, igual que en el formulario, según la instancia del partido:
+  • Fase de grupos → “Grupo A”, “Grupo B”, … “Grupo L” (el grupo del partido).
+  • Dieciseisavos → “Dieciseisavos de Final”
+  • Octavos → “Octavos de Final”
+  • Cuartos → “Cuartos de Final”
+  • Semifinales → “Semifinal”
+  • Tercer puesto o final → “Final y 3er Puesto”
 
 **📰 Contexto**
 • 2-3 viñetas máximo con lo más relevante (lesiones, forma, clima). Si no hay nada destacable, escribe una sola viñeta o omite la sección.
