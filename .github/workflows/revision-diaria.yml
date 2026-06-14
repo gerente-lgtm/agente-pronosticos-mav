@@ -1,18 +1,19 @@
 name: Revisión diaria MAV
 
-# El disparo automático lo hace cron-job.org (servicio externo confiable) llamando
-# al workflow_dispatch de abajo todos los días a las 7:00 AM hora Colombia. Se quitó
-# el "schedule" de GitHub porque en cuentas gratuitas se salta los cron casi siempre
-# (verificado 12-14 jun: hacer el repo público NO lo arregló), y tenerlo activo junto
-# a cron-job.org enviaría el Telegram dos veces.
+# Disparo automático: cron nativo de GitHub a las 7:00 AM hora Colombia.
+# (Colombia = UTC-5, sin horario de verano → 12:00 UTC.)
 #
-# Si algún día quieres volver al cron de GitHub, los horarios de producción eran
-# (Colombia = UTC-5, sin horario de verano):
-#   schedule:
-#     - cron: "40 11 * * *"   # 6:40 AM COL
-#     - cron: "0 12 * * *"    # 7:00 AM COL
-#     - cron: "20 12 * * *"   # 7:20 AM COL
+# Nota: GitHub tarda entre 15 min y ~1 h en "reconocer" un cron recién agregado o
+# modificado; NO lo edites a cada rato esperando que dispare ya, porque cada cambio
+# reinicia esa espera. Una vez asentado corre confiable en repos PÚBLICOS (como el
+# repo tracker-mav, misma cuenta). Para días de partidos muy temprano, puedes
+# correrlo a mano con "Run workflow" desde la pestaña Actions.
+#
+# Se descartó cron-job.org: su plan gratuito no transmite bien el cuerpo POST del
+# workflow_dispatch (GitHub respondía 400) y no muestra la respuesta para depurar.
 on:
+  schedule:
+    - cron: "0 12 * * *"    # 7:00 AM COL
   workflow_dispatch:
 
 jobs:
