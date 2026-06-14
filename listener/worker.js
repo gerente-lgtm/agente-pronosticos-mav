@@ -52,10 +52,10 @@ export default {
     }
 
     if (text === "/picks" || text === "/picks@agente_mav_bot") {
-      const ok = await dispararWorkflow(env);
-      const respuesta = ok
+      const r = await dispararWorkflow(env);
+      const respuesta = r.ok
         ? "🤖 Listo, estoy generando los picks de hoy. En 1-2 min te llegan 👇"
-        : "⚠️ No pude lanzar el proceso. Intenta de nuevo en un momento.";
+        : `⚠️ No pude lanzar el proceso (código ${r.status}). ${r.detalle}`;
       await responderTelegram(env, chatId, respuesta);
     } else if (text === "/start" || text === "/help") {
       await responderTelegram(
@@ -83,7 +83,12 @@ async function dispararWorkflow(env) {
     body: JSON.stringify({ ref: "main" }),
   });
   // 204 No Content = éxito al disparar el workflow.
-  return resp.status === 204;
+  if (resp.status === 204) return { ok: true };
+  let detalle = "";
+  try {
+    detalle = (await resp.text()).slice(0, 250);
+  } catch {}
+  return { ok: false, status: resp.status, detalle };
 }
 
 async function responderTelegram(env, chatId, texto) {
