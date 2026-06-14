@@ -216,6 +216,17 @@ function hoyColombia() {
   return new Date(Date.now() - 5 * 3600000).toISOString().slice(0, 10);
 }
 
+function minutosColombia() {
+  // Minutos transcurridos del día actual en hora Colombia.
+  const c = new Date(Date.now() - 5 * 3600000);
+  return c.getUTCHours() * 60 + c.getUTCMinutes();
+}
+
+function horaAMinutos(h) {
+  const m = /^(\d{1,2}):(\d{2})/.exec(h || "");
+  return m ? Number(m[1]) * 60 + Number(m[2]) : null;
+}
+
 function filaDesdePagina(pg) {
   const p = pg.properties || {};
   const sel = (name) => (p[name] && p[name].select ? p[name].select.name : "");
@@ -227,6 +238,7 @@ function filaDesdePagina(pg) {
     n: num("N"),
     e1: rich("Equipo 1"),
     e2: rich("Equipo 2"),
+    hora: rich("Hora"),
     sello: sel("Sello"),
     solsticio: sel("Solsticio"),
     disruptivo: sel("Disruptivo"),
@@ -239,7 +251,14 @@ async function notionHoy(env) {
   const resp = await fetch(url, { method: "POST", headers: notionHeaders(env), body: JSON.stringify(body) });
   if (!resp.ok) return [];
   const data = await resp.json();
-  const filas = (data.results || []).map(filaDesdePagina);
+  let filas = (data.results || []).map(filaDesdePagina);
+  // Ocultar los partidos que ya dieron pitazo (hora de inicio <= ahora en Colombia),
+  // para no editar por error uno ya empezado. Si una fila no tiene hora, se muestra.
+  const ahora = minutosColombia();
+  filas = filas.filter((f) => {
+    const ko = horaAMinutos(f.hora);
+    return ko === null || ko > ahora;
+  });
   filas.sort((a, b) => (a.n || 0) - (b.n || 0));
   return filas;
 }
