@@ -1,17 +1,13 @@
 name: Revisión diaria MAV
 
-# PRUEBA temporal (14-jun): horarios cercanos para validar que el cron dispara
-# tras hacer el repo público. Si funciona, volvemos a los horarios de la mañana.
+# PRUEBA temporal (14-jun): un horario cercano para validar el cron tras hacer
+# el repo público.
 #
-# Horarios de prueba (Colombia = UTC-5):
-#   16:00 UTC = 11:00 AM COL
-#   16:30 UTC = 11:30 AM COL
-#   17:00 UTC = 12:00 PM COL
+# Horario de prueba (Colombia = UTC-5):
+#   14:55 UTC = 9:55 AM COL
 on:
   schedule:
-    - cron: "0 16 * * *"
-    - cron: "30 16 * * *"
-    - cron: "0 17 * * *"
+    - cron: "55 14 * * *"
   workflow_dispatch:
 
 jobs:
