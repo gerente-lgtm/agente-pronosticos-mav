@@ -1,19 +1,18 @@
 name: Revisión diaria MAV
 
-# PRUEBA temporal (14-jun): horarios cercanos para validar que el cron dispara
-# tras hacer el repo público. Si funciona, volvemos a los horarios de la mañana.
+# El disparo automático lo hace cron-job.org (servicio externo confiable) llamando
+# al workflow_dispatch de abajo todos los días a las 7:00 AM hora Colombia. Se quitó
+# el "schedule" de GitHub porque en cuentas gratuitas se salta los cron casi siempre
+# (verificado 12-14 jun: hacer el repo público NO lo arregló), y tenerlo activo junto
+# a cron-job.org enviaría el Telegram dos veces.
 #
-# Horarios de prueba (Colombia = UTC-5):
-#   15:00 UTC = 10:00 AM COL
-#   16:00 UTC = 11:00 AM COL
-#   16:30 UTC = 11:30 AM COL
-#   17:00 UTC = 12:00 PM COL
+# Si algún día quieres volver al cron de GitHub, los horarios de producción eran
+# (Colombia = UTC-5, sin horario de verano):
+#   schedule:
+#     - cron: "40 11 * * *"   # 6:40 AM COL
+#     - cron: "0 12 * * *"    # 7:00 AM COL
+#     - cron: "20 12 * * *"   # 7:20 AM COL
 on:
-  schedule:
-    - cron: "0 15 * * *"
-    - cron: "0 16 * * *"
-    - cron: "30 16 * * *"
-    - cron: "0 17 * * *"
   workflow_dispatch:
 
 jobs:
