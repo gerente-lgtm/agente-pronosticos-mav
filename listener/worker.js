@@ -2,8 +2,10 @@
 //
 // Comandos:
 //   /picks               → dispara el workflow de GitHub y manda los picks del día.
-//   /update | /actualizar → flujo guiado por botones para corregir un pick en Notion:
-//                           elige partido (solo los de hoy) → formulario → valor 1/X/2.
+//   /update | /actualizar → flujo guiado por botones: elige partido (solo los de hoy
+//                           que aún no empiezan) → formulario → valor 1/X/2. El bot
+//                           entrega un link del Forms YA PRE-LLENADO; Martín lo abre,
+//                           revisa y envía, y al confirmar el bot guarda en Notion.
 //
 // El "partido de hoy" sale de la columna Fecha de la base "Picks Vigentes MAV", que
 // se carga una vez con el calendario completo (workflow "Cargar fechas").
@@ -21,7 +23,96 @@ const WORKFLOW_FILE = "revision-diaria.yml";
 // data_source_id (25ec774d...), que en /v1/databases/{id}/query da HTTP 404.
 const NOTION_DB = "71788c0c-8464-4f70-b41a-2afce8f56ae4";
 const NOTION_VERSION = "2022-06-28"; // versión de la API de Notion (válida)
-const FORMS = ["Sello", "Solsticio", "Disruptivo"];
+
+// ---- Formulario de Juan Ramón (para generar links pre-llenados) ----
+const FORM_VIEW =
+  "https://docs.google.com/forms/d/e/1FAIpQLSchbOBjdB-987wnWMSDiYd1jvEqhFUqRvttVAsM-ijxuuLbtw/viewform";
+const ENTRY_PRONOSTICO = "entry.333536740"; // desplegable "Pronóstico" (qué formulario)
+const ENTRY_FASE = "entry.1118126026"; // "¿Qué fase desea editar?"
+const PRONOSTICO = {
+  Sello: "MAV - SELLO",
+  Solsticio: "MAV - SOLSTICIO",
+  Disruptivo: "MAV - DISRUPTIVO",
+};
+// N de partido -> { phase: opción de fase, entry: campo de la fila en la grilla }.
+// Generado desde el formulario; cubre los partidos aún editables (no jugados).
+// Si cambia el formulario, regenerar (ver listener/README.md).
+const MATCH_FORM = {
+  10: { phase: "Grupo F", entry: "entry.2097471829" },
+  11: { phase: "Grupo E", entry: "entry.1069429518" },
+  12: { phase: "Grupo F", entry: "entry.1117731183" },
+  13: { phase: "Grupo H", entry: "entry.321886448" },
+  14: { phase: "Grupo G", entry: "entry.1548300475" },
+  15: { phase: "Grupo H", entry: "entry.189437360" },
+  16: { phase: "Grupo G", entry: "entry.1961136234" },
+  17: { phase: "Grupo I", entry: "entry.1594909871" },
+  18: { phase: "Grupo I", entry: "entry.203645401" },
+  19: { phase: "Grupo J", entry: "entry.681539997" },
+  20: { phase: "Grupo J", entry: "entry.1537161926" },
+  21: { phase: "Grupo K", entry: "entry.1379825598" },
+  22: { phase: "Grupo L", entry: "entry.297707473" },
+  23: { phase: "Grupo L", entry: "entry.1160309496" },
+  24: { phase: "Grupo K", entry: "entry.2030991840" },
+  25: { phase: "Grupo A", entry: "entry.1567106053" },
+  26: { phase: "Grupo B", entry: "entry.1796992615" },
+  27: { phase: "Grupo B", entry: "entry.478600219" },
+  28: { phase: "Grupo A", entry: "entry.464921062" },
+  29: { phase: "Grupo D", entry: "entry.278303135" },
+  30: { phase: "Grupo C", entry: "entry.1450083711" },
+  31: { phase: "Grupo C", entry: "entry.937413470" },
+  32: { phase: "Grupo D", entry: "entry.251320165" },
+  33: { phase: "Grupo F", entry: "entry.1419020317" },
+  34: { phase: "Grupo E", entry: "entry.828053866" },
+  35: { phase: "Grupo E", entry: "entry.1233850960" },
+  36: { phase: "Grupo F", entry: "entry.1717090229" },
+  37: { phase: "Grupo H", entry: "entry.1945501812" },
+  38: { phase: "Grupo G", entry: "entry.1428787829" },
+  39: { phase: "Grupo H", entry: "entry.632519440" },
+  40: { phase: "Grupo G", entry: "entry.266125407" },
+  41: { phase: "Grupo J", entry: "entry.849132542" },
+  42: { phase: "Grupo I", entry: "entry.1684104528" },
+  43: { phase: "Grupo I", entry: "entry.357656181" },
+  44: { phase: "Grupo J", entry: "entry.1787352918" },
+  45: { phase: "Grupo K", entry: "entry.632768083" },
+  46: { phase: "Grupo L", entry: "entry.1117690586" },
+  47: { phase: "Grupo L", entry: "entry.214017504" },
+  48: { phase: "Grupo K", entry: "entry.2006263827" },
+  49: { phase: "Grupo B", entry: "entry.488929516" },
+  50: { phase: "Grupo B", entry: "entry.1033784882" },
+  51: { phase: "Grupo C", entry: "entry.1839000064" },
+  52: { phase: "Grupo C", entry: "entry.1659790144" },
+  53: { phase: "Grupo A", entry: "entry.751819717" },
+  54: { phase: "Grupo A", entry: "entry.1777000105" },
+  55: { phase: "Grupo E", entry: "entry.291602745" },
+  56: { phase: "Grupo E", entry: "entry.2014400191" },
+  57: { phase: "Grupo F", entry: "entry.1446267601" },
+  58: { phase: "Grupo F", entry: "entry.902906700" },
+  59: { phase: "Grupo D", entry: "entry.341526811" },
+  60: { phase: "Grupo D", entry: "entry.465446993" },
+  61: { phase: "Grupo I", entry: "entry.1959305606" },
+  62: { phase: "Grupo I", entry: "entry.580687493" },
+  63: { phase: "Grupo H", entry: "entry.80555283" },
+  64: { phase: "Grupo H", entry: "entry.1244693565" },
+  65: { phase: "Grupo G", entry: "entry.1219524415" },
+  66: { phase: "Grupo G", entry: "entry.2025558146" },
+  67: { phase: "Grupo L", entry: "entry.235241352" },
+  68: { phase: "Grupo L", entry: "entry.1082440585" },
+  69: { phase: "Grupo K", entry: "entry.815108800" },
+  70: { phase: "Grupo K", entry: "entry.534211244" },
+  71: { phase: "Grupo J", entry: "entry.24058358" },
+  72: { phase: "Grupo J", entry: "entry.1558250329" },
+};
+
+function prefillUrl(form, n, val) {
+  const m = MATCH_FORM[n];
+  const pron = PRONOSTICO[form];
+  if (!m || !pron) return null;
+  const q =
+    `usp=pp_url&${ENTRY_PRONOSTICO}=${encodeURIComponent(pron)}` +
+    `&${ENTRY_FASE}=${encodeURIComponent(m.phase)}` +
+    `&${m.entry}=${encodeURIComponent(val)}`;
+  return `${FORM_VIEW}?${q}`;
+}
 
 export default {
   async fetch(request, env) {
@@ -153,7 +244,7 @@ async function manejarBoton(cq, env) {
     return;
   }
 
-  // Elegir valor → actualizar Notion (o no) y confirmar
+  // Elegir valor → dar el Forms pre-llenado para que Martín lo envíe él mismo.
   if (kind === "v") {
     const n = parts[1];
     const form = parts[2];
@@ -163,15 +254,40 @@ async function manejarBoton(cq, env) {
       await tgAnswer(env, cq.id);
       return;
     }
-    const row = await notionPorN(env, n);
-    if (!row) {
-      await tgEdit(env, chatId, messageId, "No encontré ese partido. Intenta /update de nuevo.");
+    const url = prefillUrl(form, n, val);
+    if (!url) {
+      // Sin enlace para este partido: actualizo Notion directo y aviso editar a mano.
+      const row = await notionPorN(env, n);
+      const ok = row && (await notionActualizarSelect(env, row.id, form, val));
+      await tgEdit(env, chatId, messageId, ok
+        ? `✅ Guardado en Notion: ${form}: ${val}.\nEste partido no tiene enlace pre-llenado; edítalo a mano en el Forms.`
+        : "⚠️ No pude actualizar Notion. Revisa NOTION_TOKEN.");
       await tgAnswer(env, cq.id);
       return;
     }
-    const ok = await notionActualizarSelect(env, row.id, form, val);
+    const teclado = [
+      [{ text: "📝 Abrir Forms (pre-llenado)", url }],
+      [{ text: "✅ Ya lo envié → guardar en Notion", callback_data: `d|${n}|${form}|${val}` }],
+      [{ text: "❌ Cancelar", callback_data: "x" }],
+    ];
+    await tgEdit(env, chatId, messageId,
+      `Te dejé el Forms pre-llenado como ${PRONOSTICO[form]} → ${val}.\n\n` +
+      `1) Ábrelo, revisa y dale Enviar en el Forms.\n` +
+      `2) Vuelve y toca “Ya lo envié” para guardarlo en Notion.`,
+      teclado);
+    await tgAnswer(env, cq.id);
+    return;
+  }
+
+  // Confirmación de envío → ahora sí actualizar Notion.
+  if (kind === "d") {
+    const n = parts[1];
+    const form = parts[2];
+    const val = parts[3];
+    const row = await notionPorN(env, n);
+    const ok = row && (await notionActualizarSelect(env, row.id, form, val));
     await tgEdit(env, chatId, messageId, ok
-      ? `✅ Actualizado en Notion:\n${row.e1} vs ${row.e2}\n${form}: ${val}`
+      ? `✅ Guardado en Notion:\n${row.e1} vs ${row.e2}\n${form}: ${val}`
       : "⚠️ No pude actualizar Notion. Revisa que NOTION_TOKEN tenga permiso de escritura.");
     await tgAnswer(env, cq.id);
     return;

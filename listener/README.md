@@ -4,10 +4,15 @@ Hace que, escribiéndole al bot en Telegram:
 - **`/picks`** → se ejecuta el workflow "Revisión diaria MAV" (el mismo del cron de
   las 7 AM) y llegan los picks del día. Sirve también como **respaldo manual** si el
   cron no dispara.
-- **`/update`** (o `/actualizar`) → flujo guiado por botones para corregir en Notion
-  un pick que cambiaste en el Forms: eliges el partido (solo los de hoy) → el
-  formulario (Sello/Solsticio/Disruptivo) → el valor (1/X/2 o "no cambié nada"), con
-  opción de Cancelar en cada paso y confirmación al final.
+- **`/update`** (o `/actualizar`) → flujo guiado por botones: eliges el partido (solo
+  los de hoy que aún no empiezan) → el formulario (Sello/Solsticio/Disruptivo) → el
+  valor (1/X/2). El bot te entrega un **link del Forms ya pre-llenado** con tu nombre
+  (MAV - …), la fase y el partido; lo abres, revisas y le das Enviar, y al tocar
+  "Ya lo envié" el bot guarda el cambio en Notion. Cancelar en cualquier paso.
+
+  El mapa partido→campo del Forms vive en `MATCH_FORM` dentro de `worker.js`. Cubre
+  los partidos aún editables (no jugados). Si Juan recrea el formulario y cambian los
+  `entry.*`, hay que regenerar ese mapa leyendo el HTML del formulario.
 
 Los "partidos de hoy" salen de la columna **Fecha** de la base "Picks Vigentes MAV".
 Esa columna se llena una sola vez con el calendario completo de fase de grupos
