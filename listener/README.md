@@ -77,6 +77,18 @@ Debe responder `{"ok":true, ... "description":"Webhook was set"}`.
 Escríbele **`/picks`** al bot. Debe contestar "estoy generando los picks…" y en
 1–2 min llegan las recomendaciones.
 
+### 6. Disparo diario automático (Cron Trigger)
+El Worker también corre el agente cada mañana solo (reemplaza al cron de GitHub,
+que en cuentas gratuitas no dispara confiable). En el Worker → **Settings** →
+**Triggers** → **Cron Triggers** → **Add** la expresión:
+
+```
+0 12 * * *
+```
+
+(12:00 UTC = 7:00 AM hora Colombia.) Eso ejecuta el handler `scheduled` de
+`worker.js`, que llama al `workflow_dispatch` del workflow "Revisión diaria MAV".
+
 ## Seguridad
 - Solo **tu** chat (`TELEGRAM_CHAT_ID`) puede disparar el workflow; a cualquier otro lo ignora.
 - El `WEBHOOK_SECRET` evita que alguien que adivine la URL del Worker lo dispare.

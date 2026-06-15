@@ -147,6 +147,13 @@ export default {
     }
     return new Response("OK", { status: 200 });
   },
+
+  // Disparo diario del agente. Lo activa un "Cron Trigger" de Cloudflare configurado
+  // a "0 12 * * *" (12:00 UTC = 7:00 AM Colombia). Reemplaza al cron de GitHub, que
+  // en cuentas gratuitas no dispara confiable. Ver listener/README.md.
+  async scheduled(event, env, ctx) {
+    ctx.waitUntil(dispararWorkflow(env));
+  },
 };
 
 // ---------- Mensajes de texto ----------

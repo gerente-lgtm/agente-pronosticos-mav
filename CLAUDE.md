@@ -77,11 +77,15 @@ protocolo):
   contienen "no" (`es_no_partidos` en `main()`). Si cambias el texto de "sin partidos" en el
   protocolo, revisa esa heurística.
 
-## El cron (punto delicado, ver CONTEXTO doc sección 5)
+## El disparo diario (7:00 AM COL) lo hace el Cloudflare Worker, NO GitHub
 
-GitHub Actions omite casi siempre los cron en repos **privados** de cuentas gratuitas; por eso
-este repo se hizo **público**. Si el cron programado no dispara (solo funciona "Run workflow"
-manual), el problema suele ser ese, no el código. Plan B documentado: cron-job.org externo
-llamando al `workflow_dispatch`. Los horarios de producción son 6:40/7:00/7:20 AM COL
-(`"40 11"`, `"0 12"`, `"20 12"` UTC). El workflow puede tener horarios de prueba temporales;
-restaurar los de producción al terminar de validar.
+El cron nativo de GitHub Actions **no dispara confiable** en esta cuenta (verificado 14-15 jun:
+falla incluso con el repo público). Por eso el `revision-diaria.yml` ya **no tiene `schedule`**,
+solo `workflow_dispatch`. El disparo diario lo hace el **Cloudflare Worker** (`listener/worker.js`,
+handler `scheduled`) con un **Cron Trigger** configurado en el dashboard de Cloudflare a
+`0 12 * * *` (12:00 UTC = 7:00 AM COL). El Worker está siempre prendido y llama al
+`workflow_dispatch` con los headers correctos.
+
+Detalle clave aprendido: el header `X-GitHub-Api-Version` debe ser uno soportado (`2022-11-28`);
+`2022-06-28` quedó obsoleto y GitHub responde **400**. Ese era el verdadero motivo por el que
+falló cron-job.org en su momento (no su plan gratuito). El Worker ya usa `2022-11-28`.

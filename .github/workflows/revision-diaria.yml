@@ -1,19 +1,12 @@
 name: Revisión diaria MAV
 
-# Disparo automático: cron nativo de GitHub a las 7:00 AM hora Colombia.
-# (Colombia = UTC-5, sin horario de verano → 12:00 UTC.)
-#
-# Nota: GitHub tarda entre 15 min y ~1 h en "reconocer" un cron recién agregado o
-# modificado; NO lo edites a cada rato esperando que dispare ya, porque cada cambio
-# reinicia esa espera. Una vez asentado corre confiable en repos PÚBLICOS (como el
-# repo tracker-mav, misma cuenta). Para días de partidos muy temprano, puedes
-# correrlo a mano con "Run workflow" desde la pestaña Actions.
-#
-# Se descartó cron-job.org: su plan gratuito no transmite bien el cuerpo POST del
-# workflow_dispatch (GitHub respondía 400) y no muestra la respuesta para depurar.
+# Disparo automático: lo hace el Cloudflare Worker (listener) con un Cron Trigger
+# a las 7:00 AM hora Colombia, llamando al workflow_dispatch de abajo. Se quitó el
+# cron nativo de GitHub porque en cuentas gratuitas no dispara confiable (verificado
+# 14-15 jun: ni siquiera con el repo público). El Worker ya está siempre prendido y
+# dispara el workflow con los headers correctos, así que es el disparador más fiable.
+# Ver listener/README.md y listener/worker.js (handler "scheduled").
 on:
-  schedule:
-    - cron: "0 12 * * *"    # 7:00 AM COL
   workflow_dispatch:
 
 jobs:
