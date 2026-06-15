@@ -52,7 +52,6 @@ En el Worker → **Settings** → **Variables and Secrets** → **Add**, crea es
 | `TELEGRAM_CHAT_ID` | tu chat id |
 | `WEBHOOK_SECRET` | la palabra secreta que inventaste |
 | `NOTION_TOKEN` | token de la integración "Agente MAV" (con permiso de escritura) |
-| `MAV_EMAIL` | (puede ser tipo *Text*) correo para pre-llenar el campo de correo del Forms |
 
 Guarda y **Deploy** de nuevo si lo pide.
 
