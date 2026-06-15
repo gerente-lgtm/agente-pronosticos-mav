@@ -16,6 +16,7 @@
 //   TELEGRAM_CHAT_ID  → chat de Martín; SOLO ese chat puede usar el bot.
 //   WEBHOOK_SECRET    → palabra secreta que Telegram manda en el header.
 //   NOTION_TOKEN      → token de la integración "Agente MAV" (con permiso de escritura).
+//   MAV_EMAIL         → (variable) correo para pre-llenar el campo de correo del Forms.
 
 const REPO = "gerente-lgtm/agente-pronosticos-mav";
 const WORKFLOW_FILE = "revision-diaria.yml";
@@ -103,14 +104,17 @@ const MATCH_FORM = {
   72: { phase: "Grupo J", entry: "entry.1558250329" },
 };
 
-function prefillUrl(form, n, val) {
+function prefillUrl(env, form, n, val) {
   const m = MATCH_FORM[n];
   const pron = PRONOSTICO[form];
   if (!m || !pron) return null;
-  const q =
+  let q =
     `usp=pp_url&${ENTRY_PRONOSTICO}=${encodeURIComponent(pron)}` +
     `&${ENTRY_FASE}=${encodeURIComponent(m.phase)}` +
     `&${m.entry}=${encodeURIComponent(val)}`;
+  // Correo (campo de Google "Recopilar correos"). Se toma de una variable de
+  // Cloudflare para no exponerlo en el repo público. Si no está, no se pre-llena.
+  if (env.MAV_EMAIL) q += `&emailAddress=${encodeURIComponent(env.MAV_EMAIL)}`;
   return `${FORM_VIEW}?${q}`;
 }
 
@@ -254,7 +258,7 @@ async function manejarBoton(cq, env) {
       await tgAnswer(env, cq.id);
       return;
     }
-    const url = prefillUrl(form, n, val);
+    const url = prefillUrl(env, form, n, val);
     if (!url) {
       // Sin enlace para este partido: actualizo Notion directo y aviso editar a mano.
       const row = await notionPorN(env, n);
