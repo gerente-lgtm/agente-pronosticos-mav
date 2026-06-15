@@ -151,8 +151,22 @@ export default {
   // Disparo diario del agente. Lo activa un "Cron Trigger" de Cloudflare configurado
   // a "0 12 * * *" (12:00 UTC = 7:00 AM Colombia). Reemplaza al cron de GitHub, que
   // en cuentas gratuitas no dispara confiable. Ver listener/README.md.
+  // Si algo falla, avisa por Telegram (en vez de quedar como "Error" silencioso).
   async scheduled(event, env, ctx) {
-    ctx.waitUntil(dispararWorkflow(env));
+    ctx.waitUntil(
+      (async () => {
+        try {
+          const r = await dispararWorkflow(env);
+          if (!r.ok) {
+            await tgSend(env, env.TELEGRAM_CHAT_ID,
+              `⚠️ Disparo automático (cron): GitHub respondió ${r.status}. ${r.detalle || ""}`);
+          }
+        } catch (e) {
+          await tgSend(env, env.TELEGRAM_CHAT_ID,
+            `⚠️ Disparo automático (cron) falló: ${String(e)}`);
+        }
+      })()
+    );
   },
 };
 
