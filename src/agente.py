@@ -10,6 +10,7 @@ NO envía nada al Google Forms: solo prepara y propone. El usuario confirma.
 
 import os
 import sys
+import time
 import datetime
 import urllib.request
 import urllib.parse
@@ -52,10 +53,20 @@ def _leer_picks_notion() -> list:
         payload = {"page_size": 100}
         if cursor:
             payload["start_cursor"] = cursor
-        req = urllib.request.Request(url, data=json.dumps(payload).encode(),
-                                     headers=headers, method="POST")
-        with urllib.request.urlopen(req) as r:
-            data = json.loads(r.read())
+        # Reintenta ante hipos de red/API (timeout, 429, 5xx). Sin esto, un solo
+        # fallo hacía caer al JSON de respaldo desactualizado.
+        data = None
+        for intento in range(3):
+            try:
+                req = urllib.request.Request(url, data=json.dumps(payload).encode(),
+                                             headers=headers, method="POST")
+                with urllib.request.urlopen(req, timeout=30) as r:
+                    data = json.loads(r.read())
+                break
+            except Exception:
+                if intento == 2:
+                    raise
+                time.sleep(1.5 * (intento + 1))
         filas.extend(data.get("results", []))
         if data.get("has_more"):
             cursor = data.get("next_cursor")
@@ -97,31 +108,32 @@ def _leer_picks_json() -> list:
     return doc.get("fase_grupos", [])
 
 
-def cargar_vigentes_texto() -> str:
-    """Devuelve los picks vigentes como tabla compacta de texto para que el
-    modelo compare su recomendación contra el estado actual. Primero intenta
-    Notion (lo que el usuario edita); si falla, usa el JSON del repo."""
-    fuente = ""
-    picks = []
+def cargar_vigentes_texto() -> tuple:
+    """Devuelve (texto, fuente) con los picks vigentes para que el modelo compare
+    su recomendación contra el estado actual. fuente ∈ {'notion', 'json', 'ninguna'}.
+    Primero intenta Notion (con reintentos, lo que Martín edita); si falla, usa el
+    JSON del repo (que puede estar desactualizado)."""
+    picks, fuente = [], "ninguna"
     if NOTION_TOKEN:
         try:
             picks = _leer_picks_notion()
-            fuente = "Notion (Picks Vigentes MAV)"
+            fuente = "notion"
         except Exception as e:
-            print(f"Aviso: no se pudo leer Notion ({e}). Uso el JSON de respaldo.")
+            print(f"Aviso: no se pudo leer Notion tras reintentos ({e}). Uso el JSON de respaldo.")
     if not picks:
         try:
             picks = _leer_picks_json()
-            fuente = "JSON de respaldo del repo"
+            fuente = "json"
         except Exception:
-            return "(No se pudo leer el estado vigente; omite la comparación.)"
+            return "(No se pudo leer el estado vigente; omite la comparación.)", "ninguna"
 
+    etiqueta = "Notion (Picks Vigentes MAV)" if fuente == "notion" else "JSON de respaldo del repo"
     lineas = [
         f"#{p['n']} {p['equipo1']} vs {p['equipo2']} → "
         f"Sello:{p['sello']} Solsticio:{p['solsticio']} Disruptivo:{p['disruptivo']}"
         for p in picks
     ]
-    return f"(Estado vigente — fuente: {fuente})\n" + "\n".join(lineas)
+    return f"(Estado vigente — fuente: {etiqueta})\n" + "\n".join(lineas), fuente
 
 
 def fecha_colombia() -> datetime.date:
@@ -129,7 +141,7 @@ def fecha_colombia() -> datetime.date:
     return (datetime.datetime.utcnow() - datetime.timedelta(hours=5)).date()
 
 
-def construir_prompt(hoy: datetime.date) -> str:
+def construir_prompt(hoy: datetime.date, vigentes_texto: str) -> str:
     fecha_txt = hoy.strftime("%d de %B de %Y")
     return f"""Hoy es {fecha_txt}. Eres el Agente Pronósticos MAV.
 
@@ -176,7 +188,7 @@ FORMATO DE ENVÍO (MUY IMPORTANTE):
 Sé honesto: si no encuentras un dato, di "no sé" en vez de inventar.
 
 --- ESTADO VIGENTE (lo que el usuario YA tiene cargado en el Ganagol) ---
-{cargar_vigentes_texto()}
+{vigentes_texto}
 
 --- PROTOCOLO MAV ---
 {cargar_protocolo()}
@@ -227,16 +239,27 @@ def trocear_en_partidos(salida: str) -> list:
 
 def main() -> int:
     hoy = fecha_colombia()
+    vigentes_texto, fuente = cargar_vigentes_texto()
     try:
-        salida = consultar_claude(construir_prompt(hoy))
+        salida = consultar_claude(construir_prompt(hoy, vigentes_texto))
     except Exception as e:
         enviar_telegram(f"🤖 Agente Pronósticos MAV — {hoy.strftime('%d/%m/%Y')}\n\n"
                         f"⚠️ Error al generar los picks: {e}")
         return 1
 
+    # Aviso si NO se pudo leer el estado vigente desde Notion (los "tienes [P]"
+    # podrían venir del respaldo desactualizado, o faltar la comparación).
+    aviso = ""
+    if fuente == "json":
+        aviso = ("⚠️ No pude leer Notion; usé el respaldo del repo. Los picks marcados como "
+                 "«tienes» pueden estar desactualizados — verifica contra Notion.\n\n")
+    elif fuente == "ninguna":
+        aviso = ("⚠️ No pude leer el estado vigente (ni Notion ni respaldo); puede faltar la "
+                 "comparación «tienes [P]».\n\n")
+
     bloques = trocear_en_partidos(salida)
     if not bloques:
-        enviar_telegram(f"🤖 Agente Pronósticos MAV — {hoy.strftime('%d/%m/%Y')}\n\n"
+        enviar_telegram(f"🤖 Agente Pronósticos MAV — {hoy.strftime('%d/%m/%Y')}\n\n{aviso}"
                         "No recibí contenido del modelo. Revisa manualmente los partidos de hoy.")
         return 0
 
@@ -248,7 +271,7 @@ def main() -> int:
         print("Sin partidos hoy.")
         return 0
 
-    enviar_telegram(f"🤖 Agente Pronósticos MAV — {hoy.strftime('%d/%m/%Y')}\n"
+    enviar_telegram(f"🤖 Agente Pronósticos MAV — {hoy.strftime('%d/%m/%Y')}\n{aviso}"
                     f"{n} partido(s) hoy. Te envío uno por mensaje 👇")
     for bloque in bloques:
         enviar_telegram(bloque)
