@@ -7,7 +7,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 Agente que cada mañana revisa los partidos del Mundial 2026 que se juegan hoy, investiga
 contexto (lesiones, forma, clima) con Claude + web_search, aplica el "Protocolo MAV" y envía
 a Telegram los picks recomendados 1/X/2 para tres formularios (Sello, Solsticio, Disruptivo)
-del Bono Ganagol. **No escribe en Google Forms ni en Notion: solo propone; Martín confirma.**
+del Bono Ganagol. **El agente diario (`src/agente.py`) solo propone: no envía nada.**
+
+Hay además un **listener de Telegram** (`listener/`, ver sección abajo) que sí actúa por orden
+de Martín: con `/update` escribe picks en la base de Notion y le entrega un link del Forms
+**pre-llenado** — pero el envío real al concurso de Juan Ramón siempre lo confirma él (abre el
+link y le da Enviar).
 
 Es uno de tres componentes del sistema (ver `CONTEXTO_Mundial_2026_MAV.md` en la raíz, el
 documento de traspaso con el estado completo del proyecto y los IDs de Notion):
@@ -77,15 +82,42 @@ protocolo):
   contienen "no" (`es_no_partidos` en `main()`). Si cambias el texto de "sin partidos" en el
   protocolo, revisa esa heurística.
 
-## El disparo diario (7:00 AM COL) lo hace el Cloudflare Worker, NO GitHub
+## Listener de Telegram (Cloudflare Worker) — `listener/worker.js`
 
-El cron nativo de GitHub Actions **no dispara confiable** en esta cuenta (verificado 14-15 jun:
-falla incluso con el repo público). Por eso el `revision-diaria.yml` ya **no tiene `schedule`**,
-solo `workflow_dispatch`. El disparo diario lo hace el **Cloudflare Worker** (`listener/worker.js`,
-handler `scheduled`) con un **Cron Trigger** configurado en el dashboard de Cloudflare a
-`0 12 * * *` (12:00 UTC = 7:00 AM COL). El Worker está siempre prendido y llama al
-`workflow_dispatch` con los headers correctos.
+Worker siempre prendido que recibe el webhook de Telegram (valida `WEBHOOK_SECRET`; solo
+atiende el chat de Martín). Hace tres cosas:
 
-Detalle clave aprendido: el header `X-GitHub-Api-Version` debe ser uno soportado (`2022-11-28`);
-`2022-06-28` quedó obsoleto y GitHub responde **400**. Ese era el verdadero motivo por el que
-falló cron-job.org en su momento (no su plan gratuito). El Worker ya usa `2022-11-28`.
+- **`/picks`** — dispara el `workflow_dispatch` de `revision-diaria.yml` (corre el agente a pedido).
+- **`/update`** — flujo guiado por botones: muestra los partidos de hoy **que aún no empiezan**
+  (lee Notion filtrando por `Fecha` = hoy y descarta los que ya pasaron su `Hora`) → formulario
+  → valor 1/X/2 → entrega un link del Forms **pre-llenado** y, al confirmar "ya lo envié",
+  escribe el pick en Notion (`PATCH` del select). Es la única parte que ESCRIBE en Notion.
+- **Disparo diario** (handler `scheduled`): un **Cron Trigger** de Cloudflare a `0 12 * * *`
+  (12:00 UTC = 7:00 AM COL) llama al workflow. **Reemplaza al cron de GitHub**, que no dispara
+  confiable en esta cuenta ni con el repo público (por eso `revision-diaria.yml` ya solo tiene
+  `workflow_dispatch`, sin `schedule`).
+
+Detalles clave (ganados a las malas):
+- El header `X-GitHub-Api-Version` debe ser soportado (**`2022-11-28`**); `2022-06-28` quedó
+  obsoleto y GitHub responde **400**. Aplica a cualquier llamada a la API de GitHub.
+- `MATCH_FORM` (en `worker.js`) mapea cada partido (N) a su fase y al `entry.*` de su fila en
+  el Forms, para armar el link pre-llenado. Cubre los partidos aún editables. **Si Juan recrea
+  el formulario, los `entry.*` cambian y hay que regenerar el mapa** leyendo el HTML del Forms
+  (el bloque `FB_PUBLIC_LOAD_DATA_`).
+- El campo "Correo electrónico" del Forms es el de recolección automática de Google: **no se
+  puede pre-llenar** por link (probado). El navegador lo autocompleta.
+- Los secretos del Worker viven en **Cloudflare** (no en GitHub): `GITHUB_TOKEN` (PAT
+  fine-grained, Actions R/W), `TELEGRAM_TOKEN`, `TELEGRAM_CHAT_ID`, `WEBHOOK_SECRET`,
+  `NOTION_TOKEN` (con permiso de escritura). Despliegue paso a paso en `listener/README.md`.
+
+## Notion: IDs, columnas y carga de fechas
+
+- Base "Picks Vigentes MAV". **Para la API usa el `database_id` `71788c0c-8464-4f70-b41a-2afce8f56ae4`,
+  NO el `data_source_id` `25ec774d-...`** — usar el data_source_id en `/v1/databases/{id}/query`
+  da **HTTP 404**. Este error hacía que `agente.py` cayera en silencio al JSON de respaldo en vez
+  de leer Notion; ya está corregido en `agente.py` y en `worker.js`.
+- Columnas que el `/update` necesita: `Fecha` (date) y `Hora` (text). Se llenan **una sola vez**
+  con el calendario completo de fase de grupos vía `scripts/cargar_fechas.py`, que se corre a
+  mano desde Actions → workflow **"Cargar fechas (una vez)"** (`cargar-fechas.yml`). El script
+  empareja por nombres de equipo (tolera acentos y variantes Chequia/Catar, etc.) y reporta los
+  que no emparejen o cuyo grupo no coincida.
