@@ -108,6 +108,64 @@ def _leer_picks_json() -> list:
     return doc.get("fase_grupos", [])
 
 
+def _leer_partidos_hoy_notion(hoy: datetime.date) -> list:
+    """Partidos cuya columna Fecha en Notion == hoy (hora Colombia). Devuelve
+    [{n, equipo1, equipo2, hora}] ordenado por hora. Lanza excepción si falla.
+    Sirve para darle al modelo la lista DEFINITIVA del día (incluye los de las
+    23:00 COL, que la búsqueda web suele ubicar en el día siguiente del estadio)."""
+    url = f"https://api.notion.com/v1/databases/{NOTION_PICKS_DB}/query"
+    headers = {
+        "Authorization": f"Bearer {NOTION_TOKEN}",
+        "Notion-Version": NOTION_VERSION,
+        "Content-Type": "application/json",
+    }
+    payload = {"filter": {"property": "Fecha", "date": {"equals": hoy.isoformat()}},
+               "page_size": 100}
+    data = None
+    for intento in range(3):
+        try:
+            req = urllib.request.Request(url, data=json.dumps(payload).encode(),
+                                         headers=headers, method="POST")
+            with urllib.request.urlopen(req, timeout=30) as r:
+                data = json.loads(r.read())
+            break
+        except Exception:
+            if intento == 2:
+                raise
+            time.sleep(1.5 * (intento + 1))
+
+    def rich(p, name):
+        arr = p.get(name, {}).get("rich_text", [])
+        return "".join(t.get("plain_text", "") for t in arr).strip()
+
+    partidos = []
+    for f in data.get("results", []):
+        p = f.get("properties", {})
+        partidos.append({
+            "n": p.get("N", {}).get("number"),
+            "equipo1": rich(p, "Equipo 1"),
+            "equipo2": rich(p, "Equipo 2"),
+            "hora": rich(p, "Hora"),
+        })
+    partidos.sort(key=lambda x: x["hora"] or "")
+    return partidos
+
+
+def calendario_hoy_texto(hoy: datetime.date) -> str:
+    """Lista en texto de los partidos de hoy según Notion, o "" si no se puede leer."""
+    if not NOTION_TOKEN:
+        return ""
+    try:
+        partidos = _leer_partidos_hoy_notion(hoy)
+    except Exception as e:
+        print(f"Aviso: no pude leer el calendario de hoy en Notion ({e}).")
+        return ""
+    return "\n".join(
+        f"- {p['hora'] or '??:??'} COL · {p['equipo1']} vs {p['equipo2']} (#{p['n']})"
+        for p in partidos
+    )
+
+
 def cargar_vigentes_texto() -> tuple:
     """Devuelve (texto, fuente) con los picks vigentes para que el modelo compare
     su recomendación contra el estado actual. fuente ∈ {'notion', 'json', 'ninguna'}.
@@ -141,19 +199,29 @@ def fecha_colombia() -> datetime.date:
     return (datetime.datetime.utcnow() - datetime.timedelta(hours=5)).date()
 
 
-def construir_prompt(hoy: datetime.date, vigentes_texto: str) -> str:
+def construir_prompt(hoy: datetime.date, vigentes_texto: str, calendario_hoy: str = "") -> str:
     fecha_txt = hoy.strftime("%d de %B de %Y")
+    bloque_cal = ""
+    if calendario_hoy:
+        bloque_cal = (
+            "PARTIDOS DE HOY (calendario oficial, en HORA COLOMBIA — esta es la lista "
+            "DEFINITIVA del día: cúbrelos TODOS, sin omitir ninguno, incluidos los "
+            f"nocturnos de las 23:00):\n{calendario_hoy}\n\n"
+        )
     return f"""Hoy es {fecha_txt}. Eres el Agente Pronósticos MAV.
 
-TAREA:
-1. Busca en internet TODOS los partidos del Mundial 2026 que se juegan HOY ({fecha_txt}).
-   Haz esto en dos pasos para no dejar ninguno por fuera:
-   (a) Primero busca el calendario/fixture completo del día y haz una LISTA
-       EXHAUSTIVA de todos los partidos del torneo cuyo pitazo caiga hoy. Para
-       cada Mundial hay varios partidos por día en fase de grupos (normalmente
-       entre 3 y 6). Si tu primera búsqueda devuelve solo 1 o 2, NO te detengas:
-       busca de nuevo con otros términos (por jornada, por grupo, "todos los
-       partidos de hoy Mundial 2026") hasta tener el calendario completo del día.
+{bloque_cal}TAREA:
+1. Determina TODOS los partidos del Mundial 2026 que se juegan HOY ({fecha_txt}).
+   - Si arriba aparece la lista "PARTIDOS DE HOY", esa es la lista DEFINITIVA: úsala
+     tal cual y cúbrelos TODOS (no omitas ninguno, ni el de las 23:00). Igual usa la
+     web para el contexto de cada uno (alineaciones, lesiones, clima).
+   - Si NO aparece esa lista, búscala tú en internet en dos pasos para no dejar
+     ninguno por fuera:
+   (a) Busca el calendario/fixture completo del día y haz una LISTA EXHAUSTIVA de
+       todos los partidos del torneo cuyo pitazo caiga hoy. Para cada Mundial hay
+       varios partidos por día en fase de grupos (normalmente entre 3 y 6). Si tu
+       primera búsqueda devuelve solo 1 o 2, NO te detengas: busca de nuevo con otros
+       términos hasta tener el calendario completo del día.
    (b) Verifica el conteo: cuenta cuántos partidos tiene tu lista y confírmalo
        contra el fixture antes de seguir. Reporta TODOS, no solo el más próximo.
    CRITERIO DE DÍA (IMPORTANTE): incluye TODO partido cuyo pitazo (hora de inicio)
@@ -240,8 +308,9 @@ def trocear_en_partidos(salida: str) -> list:
 def main() -> int:
     hoy = fecha_colombia()
     vigentes_texto, fuente = cargar_vigentes_texto()
+    calendario = calendario_hoy_texto(hoy)
     try:
-        salida = consultar_claude(construir_prompt(hoy, vigentes_texto))
+        salida = consultar_claude(construir_prompt(hoy, vigentes_texto, calendario))
     except Exception as e:
         enviar_telegram(f"🤖 Agente Pronósticos MAV — {hoy.strftime('%d/%m/%Y')}\n\n"
                         f"⚠️ Error al generar los picks: {e}")
