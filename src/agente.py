@@ -278,7 +278,10 @@ def consultar_claude(prompt: str) -> str:
     client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
     resp = client.messages.create(
         model=MODEL,
-        max_tokens=4000,
+        # 8000 (no 4000): con 6 partidos + el texto intermedio del bucle de
+        # web_search, 4000 tokens se quedaban cortos y la salida se truncaba,
+        # perdiendo el último partido (se veían 5 de 6).
+        max_tokens=8000,
         messages=[{"role": "user", "content": prompt}],
         tools=[{"type": "web_search_20250305", "name": "web_search", "max_uses": 12}],
     )
@@ -320,6 +323,9 @@ def main() -> int:
     hoy = fecha_colombia()
     vigentes_texto, fuente = cargar_vigentes_texto()
     calendario = calendario_hoy_texto(hoy)
+    # Nº de partidos que Notion dice que hay hoy (una línea por partido); 0 si no
+    # se pudo leer el calendario. Sirve para detectar si el modelo omite alguno.
+    n_calendario = len([l for l in calendario.splitlines() if l.strip()]) if calendario else 0
     try:
         salida = consultar_claude(construir_prompt(hoy, vigentes_texto, calendario))
     except Exception as e:
@@ -350,6 +356,13 @@ def main() -> int:
         enviar_telegram(f"🤖 Agente Pronósticos MAV — {hoy.strftime('%d/%m/%Y')}\n\n{bloques[0]}")
         print("Sin partidos hoy.")
         return 0
+
+    # Red de seguridad: si Notion dice que hoy hay más partidos de los que el
+    # modelo detalló, avisa y manda el calendario completo para no marcar a ciegas.
+    if n_calendario and n < n_calendario:
+        aviso += (f"⚠️ El calendario de hoy tiene {n_calendario} partidos pero el modelo "
+                  f"solo detalló {n} (faltaría(n) {n_calendario - n}). Calendario completo "
+                  f"de hoy para que verifiques:\n{calendario}\n\n")
 
     enviar_telegram(f"🤖 Agente Pronósticos MAV — {hoy.strftime('%d/%m/%Y')}\n{aviso}"
                     f"{n} partido(s) hoy. Te envío uno por mensaje 👇")
