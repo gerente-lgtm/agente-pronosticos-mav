@@ -237,6 +237,17 @@ def construir_prompt(hoy: datetime.date, vigentes_texto: str, calendario_hoy: st
    como referencia de probabilidad/leverage.
 3. Aplica el PROTOCOLO MAV (abajo) y decide los picks 1/X/2 recomendados para
    los tres formularios (Sello, Solsticio, Disruptivo) de cada partido del día.
+   ORDEN DE EQUIPOS (CRÍTICO): respeta SIEMPRE el orden EXACTO «equipo1 vs equipo2»
+   tal como aparece en el ESTADO VIGENTE y en la lista PARTIDOS DE HOY de arriba
+   (ese orden es el del fixture oficial FIFA y el del formulario). equipo1 es el
+   que FIFA designa «local»/primero y equipo2 el que designa «visitante»/segundo
+   en el cartel del partido, que NO es necesariamente quien juega en su propio
+   estadio o país. No reordenes los equipos por sede ni por favoritismo. El dígito
+   significa: 1 = gana el equipo listado PRIMERO; 2 = gana el listado SEGUNDO. El
+   equipo de casa puede estar listado de SEGUNDO: si recomiendas que gane el local
+   y está de segundo, el pick es 2 (no 1). Escribe el encabezado «EQUIPO1 vs
+   EQUIPO2» en ese mismo orden. Antes de fijar cada dígito, verifica: «el equipo
+   que digo que gana, ¿está listado primero (→1) o segundo (→2)?».
 4. COMPARA tu recomendación con el ESTADO VIGENTE de abajo: busca cada partido
    de hoy por los nombres de los equipos y mira qué tiene cargado el usuario en
    cada formulario. Para cada formulario indica si debe DEJAR IGUAL o CAMBIAR.
