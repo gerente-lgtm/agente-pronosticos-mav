@@ -25,93 +25,83 @@ const NOTION_DB = "71788c0c-8464-4f70-b41a-2afce8f56ae4";
 const NOTION_VERSION = "2022-06-28"; // versión de la API de Notion (válida)
 
 // ---- Formulario de Juan Ramón (para generar links pre-llenados) ----
+// Juan reusó el MISMO documento de Forms (misma URL) y lo rearmó para la fase
+// final: el desplegable de fase ya no tiene grupos (solo Dieciseisavos→Final) y
+// TODOS los entry.* cambiaron. Por eso ENTRY_PRONOSTICO/ENTRY_FASE y MATCH_FORM
+// se regeneraron desde el HTML nuevo (bloque FB_PUBLIC_LOAD_DATA_). Ver README.
 const FORM_VIEW =
   "https://docs.google.com/forms/d/e/1FAIpQLSchbOBjdB-987wnWMSDiYd1jvEqhFUqRvttVAsM-ijxuuLbtw/viewform";
-const ENTRY_PRONOSTICO = "entry.333536740"; // desplegable "Pronóstico" (qué formulario)
-const ENTRY_FASE = "entry.1118126026"; // "¿Qué fase desea editar?"
+const ENTRY_PRONOSTICO = "entry.1733454846"; // desplegable "Pronóstico" (qué formulario)
+const ENTRY_FASE = "entry.1932888000"; // "¿Que fase desea editar?"
+// El Email es de recolección automática de Google: NO se pre-llena con un entry.*,
+// sino con el parámetro especial &emailAddress=. (El navegador igual lo autocompleta
+// si Martín ya tiene sesión; esto es un refuerzo.)
+const EMAIL = "manono32@gmail.com";
 const PRONOSTICO = {
   Sello: "MAV - SELLO",
   Solsticio: "MAV - SOLSTICIO",
   Disruptivo: "MAV - DISRUPTIVO",
 };
-// N de partido -> { phase: opción de fase, entry: campo de la fila en la grilla }.
-// Generado desde el formulario; cubre los partidos aún editables (no jugados).
-// Si cambia el formulario, regenerar (ver listener/README.md).
+// N de partido (numeración oficial FIFA, igual que en Notion) -> { phase, entry }.
+//   phase = opción EXACTA del campo "¿Que fase desea editar?" (entry.1932888000).
+//   entry = campo 1/X/2 de ese partido en el Forms.
+// La fase de grupos (N 1-72) ya terminó: Juan reconstruyó el MISMO formulario para
+// la fase final, así que esos entry.* viejos se eliminaron y aquí ya no van.
+// Octavos→Final (89-104) ya quedaron mapeados desde el HTML (el orden de los entry
+// sigue la numeración de partido); los equipos se llenarán en Notion al definirse.
+// Si Juan vuelve a recrear el formulario, regenerar (ver listener/README.md).
 const MATCH_FORM = {
-  10: { phase: "Grupo F", entry: "entry.2097471829" },
-  11: { phase: "Grupo E", entry: "entry.1069429518" },
-  12: { phase: "Grupo F", entry: "entry.1117731183" },
-  13: { phase: "Grupo H", entry: "entry.321886448" },
-  14: { phase: "Grupo G", entry: "entry.1548300475" },
-  15: { phase: "Grupo H", entry: "entry.189437360" },
-  16: { phase: "Grupo G", entry: "entry.1961136234" },
-  17: { phase: "Grupo I", entry: "entry.1594909871" },
-  18: { phase: "Grupo I", entry: "entry.203645401" },
-  19: { phase: "Grupo J", entry: "entry.681539997" },
-  20: { phase: "Grupo J", entry: "entry.1537161926" },
-  21: { phase: "Grupo K", entry: "entry.1379825598" },
-  22: { phase: "Grupo L", entry: "entry.297707473" },
-  23: { phase: "Grupo L", entry: "entry.1160309496" },
-  24: { phase: "Grupo K", entry: "entry.2030991840" },
-  25: { phase: "Grupo A", entry: "entry.1567106053" },
-  26: { phase: "Grupo B", entry: "entry.1796992615" },
-  27: { phase: "Grupo B", entry: "entry.478600219" },
-  28: { phase: "Grupo A", entry: "entry.464921062" },
-  29: { phase: "Grupo D", entry: "entry.278303135" },
-  30: { phase: "Grupo C", entry: "entry.1450083711" },
-  31: { phase: "Grupo C", entry: "entry.937413470" },
-  32: { phase: "Grupo D", entry: "entry.251320165" },
-  33: { phase: "Grupo F", entry: "entry.1419020317" },
-  34: { phase: "Grupo E", entry: "entry.828053866" },
-  35: { phase: "Grupo E", entry: "entry.1233850960" },
-  36: { phase: "Grupo F", entry: "entry.1717090229" },
-  37: { phase: "Grupo H", entry: "entry.1945501812" },
-  38: { phase: "Grupo G", entry: "entry.1428787829" },
-  39: { phase: "Grupo H", entry: "entry.632519440" },
-  40: { phase: "Grupo G", entry: "entry.266125407" },
-  41: { phase: "Grupo J", entry: "entry.849132542" },
-  42: { phase: "Grupo I", entry: "entry.1684104528" },
-  43: { phase: "Grupo I", entry: "entry.357656181" },
-  44: { phase: "Grupo J", entry: "entry.1787352918" },
-  45: { phase: "Grupo K", entry: "entry.632768083" },
-  46: { phase: "Grupo L", entry: "entry.1117690586" },
-  47: { phase: "Grupo L", entry: "entry.214017504" },
-  48: { phase: "Grupo K", entry: "entry.2006263827" },
-  49: { phase: "Grupo B", entry: "entry.488929516" },
-  50: { phase: "Grupo B", entry: "entry.1033784882" },
-  51: { phase: "Grupo C", entry: "entry.1839000064" },
-  52: { phase: "Grupo C", entry: "entry.1659790144" },
-  53: { phase: "Grupo A", entry: "entry.751819717" },
-  54: { phase: "Grupo A", entry: "entry.1777000105" },
-  55: { phase: "Grupo E", entry: "entry.291602745" },
-  56: { phase: "Grupo E", entry: "entry.2014400191" },
-  57: { phase: "Grupo F", entry: "entry.1446267601" },
-  58: { phase: "Grupo F", entry: "entry.902906700" },
-  59: { phase: "Grupo D", entry: "entry.341526811" },
-  60: { phase: "Grupo D", entry: "entry.465446993" },
-  61: { phase: "Grupo I", entry: "entry.1959305606" },
-  62: { phase: "Grupo I", entry: "entry.580687493" },
-  63: { phase: "Grupo H", entry: "entry.80555283" },
-  64: { phase: "Grupo H", entry: "entry.1244693565" },
-  65: { phase: "Grupo G", entry: "entry.1219524415" },
-  66: { phase: "Grupo G", entry: "entry.2025558146" },
-  67: { phase: "Grupo L", entry: "entry.235241352" },
-  68: { phase: "Grupo L", entry: "entry.1082440585" },
-  69: { phase: "Grupo K", entry: "entry.815108800" },
-  70: { phase: "Grupo K", entry: "entry.534211244" },
-  71: { phase: "Grupo J", entry: "entry.24058358" },
-  72: { phase: "Grupo J", entry: "entry.1558250329" },
+  // Dieciseisavos de Final (73-88) — equipos confirmados
+  73: { phase: "Dieciseisavos de Final", entry: "entry.2118226769" }, // Sudáfrica - Canadá
+  74: { phase: "Dieciseisavos de Final", entry: "entry.397906492" }, // Alemania - Paraguay
+  75: { phase: "Dieciseisavos de Final", entry: "entry.1781559261" }, // Países Bajos - Marruecos
+  76: { phase: "Dieciseisavos de Final", entry: "entry.2095044498" }, // Brasil - Japón
+  77: { phase: "Dieciseisavos de Final", entry: "entry.1093874664" }, // Francia - Suecia
+  78: { phase: "Dieciseisavos de Final", entry: "entry.2146985311" }, // Costa de Marfil - Noruega
+  79: { phase: "Dieciseisavos de Final", entry: "entry.1282885633" }, // México - Ecuador
+  80: { phase: "Dieciseisavos de Final", entry: "entry.21340784" }, // Inglaterra - RD Congo
+  81: { phase: "Dieciseisavos de Final", entry: "entry.1536413203" }, // Estados Unidos - Bosnia y Herzegovina
+  82: { phase: "Dieciseisavos de Final", entry: "entry.1801104802" }, // Bélgica - Senegal
+  83: { phase: "Dieciseisavos de Final", entry: "entry.1964534821" }, // Portugal - Croacia
+  84: { phase: "Dieciseisavos de Final", entry: "entry.961815495" }, // España - Austria
+  85: { phase: "Dieciseisavos de Final", entry: "entry.158754040" }, // Suiza - Argelia
+  86: { phase: "Dieciseisavos de Final", entry: "entry.1462427909" }, // Argentina - Cabo Verde
+  87: { phase: "Dieciseisavos de Final", entry: "entry.1321152750" }, // Colombia - Ghana
+  88: { phase: "Dieciseisavos de Final", entry: "entry.1090640977" }, // Australia - Egipto
+  // Octavos de Final (89-96) — equipos por definir; entry ya mapeado
+  89: { phase: "Octavos de Final", entry: "entry.1886201498" },
+  90: { phase: "Octavos de Final", entry: "entry.1887649088" },
+  91: { phase: "Octavos de Final", entry: "entry.866848116" },
+  92: { phase: "Octavos de Final", entry: "entry.686024072" },
+  93: { phase: "Octavos de Final", entry: "entry.776928103" },
+  94: { phase: "Octavos de Final", entry: "entry.974896850" },
+  95: { phase: "Octavos de Final", entry: "entry.1123384809" },
+  96: { phase: "Octavos de Final", entry: "entry.751674502" },
+  // Cuartos de Final (97-100) — equipos por definir
+  97: { phase: "Cuartos de Final", entry: "entry.373169074" },
+  98: { phase: "Cuartos de Final", entry: "entry.931302959" },
+  99: { phase: "Cuartos de Final", entry: "entry.557154252" },
+  100: { phase: "Cuartos de Final", entry: "entry.799987062" },
+  // Semifinal (101-102) — equipos por definir
+  101: { phase: "Semifinal", entry: "entry.1959617231" },
+  102: { phase: "Semifinal", entry: "entry.797875772" },
+  // 3er Puesto (103) y Final (104) — usan la misma opción de fase
+  103: { phase: "Final y 3er Puesto", entry: "entry.1930004699" },
+  104: { phase: "Final y 3er Puesto", entry: "entry.89152736" },
 };
 
 function prefillUrl(env, form, n, val) {
   const m = MATCH_FORM[n];
   const pron = PRONOSTICO[form];
   if (!m || !pron) return null;
-  // Nota: el campo "Correo electrónico" del Forms es el de recolección automática de
-  // Google, que NO se puede pre-llenar por link (probado). El navegador suele
-  // autocompletarlo. Por eso solo pre-llenamos nombre (Pronóstico), fase y partido.
+  // El Email va como &emailAddress (recolección automática de Google; no es entry.*).
+  // OJO (navegación condicional): el Forms tiene 6 páginas por rama según la fase. El
+  // pre-llenado de páginas posteriores puede no "saltar" la navegación solo, así que
+  // Martín debe avanzar con Siguiente y confirmar que el 1/X/2 quedó marcado antes de
+  // enviar. Esto hay que probarlo en la práctica.
   const q =
-    `usp=pp_url&${ENTRY_PRONOSTICO}=${encodeURIComponent(pron)}` +
+    `usp=pp_url&emailAddress=${encodeURIComponent(EMAIL)}` +
+    `&${ENTRY_PRONOSTICO}=${encodeURIComponent(pron)}` +
     `&${ENTRY_FASE}=${encodeURIComponent(m.phase)}` +
     `&${m.entry}=${encodeURIComponent(val)}`;
   return `${FORM_VIEW}?${q}`;
@@ -296,8 +286,10 @@ async function manejarBoton(cq, env) {
     ];
     await tgEdit(env, chatId, messageId,
       `Te dejé el Forms pre-llenado como ${PRONOSTICO[form]} → ${val}.\n\n` +
-      `1) Ábrelo, revisa y dale Enviar en el Forms.\n` +
-      `2) Vuelve y toca “Ya lo envié” para guardarlo en Notion.`,
+      `1) Ábrelo. El Forms tiene páginas por fase: avanza con “Siguiente” y ` +
+      `confirma que el partido quedó marcado en ${val} antes de enviar.\n` +
+      `2) Dale Enviar en el Forms.\n` +
+      `3) Vuelve y toca “Ya lo envié” para guardarlo en Notion.`,
       teclado);
     await tgAnswer(env, cq.id);
     return;
