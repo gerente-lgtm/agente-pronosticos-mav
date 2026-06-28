@@ -97,10 +97,9 @@ function prefillUrl(env, form, n, val) {
   const pron = PRONOSTICO[form];
   if (!m || !pron) return null;
   // El Email va como &emailAddress (recolección automática de Google; no es entry.*).
-  // OJO (navegación condicional): el Forms tiene 6 páginas por rama según la fase. El
-  // pre-llenado de páginas posteriores puede no "saltar" la navegación solo, así que
-  // Martín debe avanzar con Siguiente y confirmar que el 1/X/2 quedó marcado antes de
-  // enviar. Esto hay que probarlo en la práctica.
+  // Navegación: el Forms tiene varias páginas por rama según la fase. El pre-llenado
+  // no "salta" la navegación solo, así que Martín avanza con Siguiente; al llegar a la
+  // página del partido el 1/X/2 ya aparece marcado (confirmado en práctica, jun 2026).
   const q =
     `usp=pp_url&emailAddress=${encodeURIComponent(EMAIL)}` +
     `&${ENTRY_PRONOSTICO}=${encodeURIComponent(pron)}` +
