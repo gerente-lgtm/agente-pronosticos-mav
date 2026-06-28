@@ -15,22 +15,25 @@ Hace que, escribiéndole al bot en Telegram:
   HTML del formulario (el bloque `FB_PUBLIC_LOAD_DATA_`).
 
   **Cambio de formulario para la fase final (jun 2026):** al terminar los grupos, Juan
-  reusó el **mismo documento** de Forms (misma URL) y lo rearmó para la eliminación.
-  El desplegable de fase pasó de tener grupos a tener solo Dieciseisavos → Octavos →
-  Cuartos → Semifinal → Final y 3er Puesto, y **todos los `entry.*` cambiaron** (también
-  los de "Pronóstico" y "¿Qué fase desea editar?"). Por eso `MATCH_FORM` ya no tiene los
-  partidos 1–72 (grupos, ya jugados) sino:
+  editó el **mismo documento** de Forms (misma URL): le quitó las secciones de grupos y
+  dejó solo Dieciseisavos → Octavos → Cuartos → Semifinal → Final y 3er Puesto. OJO: los
+  campos **conservaron sus `entry.*` originales** (verificado contra el HTML en vivo):
+  "Pronóstico" = `entry.333536740`, "¿Qué fase desea editar?" = `entry.1118126026`, y las
+  grillas de eliminatorias mantienen sus IDs. (Una nota previa decía por error que "todos
+  cambiaron"; no fue así.) Por eso `MATCH_FORM` ya no tiene los partidos 1–72 (grupos, no
+  editables) sino:
   - **Dieciseisavos (73–88):** con equipos confirmados.
-  - **Octavos→Final (89–104):** `entry.*` ya mapeados desde el HTML (van por número de
-    partido); los equipos se cargan en Notion al definirse cada ronda.
+  - **Octavos→Final (89–104):** `entry.*` ya mapeados desde el HTML; los equipos se cargan
+    en Notion al definirse cada ronda.
 
   Los N de `MATCH_FORM` coinciden con la numeración oficial FIFA y con la columna `N` de
   Notion (el `/update` mapea N de Notion → `entry` del Forms, así que deben ir alineados).
   El **Email** se pre-llena con `&emailAddress=` (recolección automática de Google, no es
-  un `entry.*`). **Ojo con la navegación condicional:** el Forms tiene 6 páginas por rama
-  según la fase; el pre-llenado de los partidos puede no "saltar" la navegación solo, así
-  que hay que avanzar con *Siguiente* y confirmar que el 1/X/2 quedó marcado antes de
-  enviar (queda por probar en la práctica).
+  un `entry.*`). La **página 1** (Pronóstico + fase) ya se pre-llena bien (probado). **Ojo
+  con la navegación condicional:** el Forms tiene varias páginas por rama según la fase; el
+  pre-llenado del `1/X/2` del partido (en una página posterior) puede no "saltar" la
+  navegación solo, así que hay que avanzar con *Siguiente* y confirmar que quedó marcado
+  antes de enviar.
 
   > Tras editar `worker.js` hay que **redesplegar el Worker** en Cloudflare (Edit code →
   > pegar → Deploy); el push a GitHub no actualiza el Worker por sí solo.

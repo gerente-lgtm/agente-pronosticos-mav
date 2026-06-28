@@ -46,13 +46,12 @@ const PRONOSTICO = {
   Disruptivo: "MAV - DISRUPTIVO",
 };
 // N de partido (numeración oficial FIFA, igual que en Notion) -> { phase, entry }.
-//   phase = opción EXACTA del campo "¿Que fase desea editar?" (entry.1932888000).
+//   phase = opción EXACTA del campo "¿Que fase desea editar?" (ENTRY_FASE arriba).
 //   entry = campo 1/X/2 de ese partido en el Forms.
-// La fase de grupos (N 1-72) ya terminó: Juan reconstruyó el MISMO formulario para
-// la fase final, así que esos entry.* viejos se eliminaron y aquí ya no van.
-// Octavos→Final (89-104) ya quedaron mapeados desde el HTML (el orden de los entry
-// sigue la numeración de partido); los equipos se llenarán en Notion al definirse.
-// Si Juan vuelve a recrear el formulario, regenerar (ver listener/README.md).
+// La fase de grupos (N 1-72) ya terminó y Juan le quitó esas secciones al Forms, así
+// que aquí solo van las eliminatorias (73-104). Dieciseisavos (73-88) con equipos
+// confirmados; Octavos→Final (89-104) con el entry ya mapeado (los equipos se llenan
+// en Notion al definirse cada ronda). Si Juan recrea el formulario, regenerar (ver README).
 const MATCH_FORM = {
   // Dieciseisavos de Final (73-88) — equipos confirmados
   73: { phase: "Dieciseisavos de Final", entry: "entry.2118226769" }, // Sudáfrica - Canadá
