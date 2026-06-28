@@ -25,14 +25,17 @@ const NOTION_DB = "71788c0c-8464-4f70-b41a-2afce8f56ae4";
 const NOTION_VERSION = "2022-06-28"; // versión de la API de Notion (válida)
 
 // ---- Formulario de Juan Ramón (para generar links pre-llenados) ----
-// Juan reusó el MISMO documento de Forms (misma URL) y lo rearmó para la fase
-// final: el desplegable de fase ya no tiene grupos (solo Dieciseisavos→Final) y
-// TODOS los entry.* cambiaron. Por eso ENTRY_PRONOSTICO/ENTRY_FASE y MATCH_FORM
-// se regeneraron desde el HTML nuevo (bloque FB_PUBLIC_LOAD_DATA_). Ver README.
+// Juan reusó el MISMO documento de Forms (misma URL) y le quitó las secciones de
+// grupos, dejando solo las eliminatorias (Dieciseisavos→Final). IMPORTANTE: los
+// campos CONSERVARON sus entry.* originales (verificado contra el HTML en vivo,
+// jun 2026): "Pronóstico"=333536740, "¿Que fase desea editar?"=1118126026, y las
+// grillas de eliminatorias mantienen sus IDs. (No "cambiaron todos" como decía
+// una nota previa.) Si algún día Juan recrea el formulario de cero, regenerar
+// estos IDs leyendo el bloque FB_PUBLIC_LOAD_DATA_ del HTML. Ver README.
 const FORM_VIEW =
   "https://docs.google.com/forms/d/e/1FAIpQLSchbOBjdB-987wnWMSDiYd1jvEqhFUqRvttVAsM-ijxuuLbtw/viewform";
-const ENTRY_PRONOSTICO = "entry.1733454846"; // desplegable "Pronóstico" (qué formulario)
-const ENTRY_FASE = "entry.1932888000"; // "¿Que fase desea editar?"
+const ENTRY_PRONOSTICO = "entry.333536740"; // desplegable "Pronóstico" (qué formulario)
+const ENTRY_FASE = "entry.1118126026"; // "¿Que fase desea editar?"
 // El Email es de recolección automática de Google: NO se pre-llena con un entry.*,
 // sino con el parámetro especial &emailAddress=. (El navegador igual lo autocompleta
 // si Martín ya tiene sesión; esto es un refuerzo.)
